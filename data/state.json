@@ -1,0 +1,48 @@
+{
+  "unlockThrough": "Wrestler",
+  "explicitUnlocked": [
+    "Comic",
+    "Disc Jockey",
+    "Watchmaker",
+    "Cosmetic Surgeon",
+    "Bodybuilder",
+    "Talkshow Host",
+    "Chemist",
+    "Lumberjack",
+    "Lawn Gnome",
+    "Electrician",
+    "Cashier",
+    "Security Guard",
+    "Ambassador",
+    "Mad Scientist",
+    "Supervillain",
+    "Jack-O-Lantern",
+    "Politician",
+    "Captain",
+    "Sea Dog",
+    "Entomologist",
+    "Clown",
+    "Statistician",
+    "Witch"
+  ],
+  "explicitPending": [
+    "Matador",
+    "Apprentice",
+    "System Admin",
+    "Genie",
+    "Centaur",
+    "Wedding Singer",
+    "Jeweller",
+    "Chocolatier",
+    "Matchmaker",
+    "Dating Advisor"
+  ],
+  "targetFrom": "Federal Agent",
+  "aliases": {
+    "Supervilain": "Supervillain"
+  },
+  "notes": [
+    "unlockThrough is a convenience baseline only; explicitUnlocked is the player's confirmed state.",
+    "Build adds ordinary-profession prerequisites for unlocked professions; special genes are treated as available only when implied by confirmed unlocked formulas."
+  ]
+}

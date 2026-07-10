@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pixel People 职业解锁自查表</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Pixel People 职业解锁自查表</h1>
+    <div id="meta" class="meta">加载数据中...</div>
+    <div id="genes" class="meta"></div>
+  </header>
+
+  <main>
+    <div class="stats">
+      <div class="stat"><b id="stat-total">-</b><span>职业总数</span></div>
+      <div class="stat"><b id="stat-unlocked">-</b><span>当前已解锁/推定已解锁</span></div>
+      <div class="stat"><b id="stat-buildings">-</b><span>当前已覆盖建筑</span></div>
+      <div class="stat"><b id="stat-planned">-</b><span>当前可规划解锁</span></div>
+      <div class="stat"><b id="stat-blocked">-</b><span>仍缺前置</span></div>
+    </div>
+
+    <section>
+      <h2>优先新增建筑</h2>
+      <div class="table-wrap small-table">
+        <table>
+          <thead>
+            <tr><th>推荐顺位</th><th>职业</th><th>分类</th><th>合成与分类</th><th>新增建筑</th><th>工作建筑</th></tr>
+          </thead>
+          <tbody id="topNewRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>完整职业表</h2>
+      <div class="controls">
+        <input id="q" placeholder="搜索职业、分类、前置、前置分类、建筑、缺失前置" />
+        <select id="status"><option value="">全部状态</option></select>
+        <select id="category"><option value="">全部分类</option></select>
+      </div>
+      <div class="table-wrap">
+        <table id="professionTable">
+          <thead>
+            <tr>
+              <th>#</th><th>职业</th><th>分类</th>
+              <th>前置1</th><th>前置1分类</th><th>前置2</th><th>前置2分类</th>
+              <th>工作建筑</th><th>状态</th><th>当前可合成</th><th>当前新增建筑</th>
+              <th>推荐顺位</th><th>该步新增建筑</th><th>缺失前置</th>
+            </tr>
+          </thead>
+          <tbody id="professionRows"></tbody>
+        </table>
+      </div>
+      <p class="note">“当前新增建筑”是以你现在已解锁集合为基准；“该步新增建筑”是按推荐顺序执行到该职业时仍然首次出现的建筑。</p>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
