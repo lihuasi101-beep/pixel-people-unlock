@@ -23,13 +23,20 @@
     "Entomologist",
     "Clown",
     "Statistician",
-    "Witch"
+    "Witch",
+    "Civil Servant",
+    "Hair Stylist",
+    "Barista",
+    "Genie",
+    "Entrepreneur",
+    "Fencer",
+    "Party Animal",
+    "Pyrotechnician"
   ],
   "explicitPending": [
     "Matador",
     "Apprentice",
     "System Admin",
-    "Genie",
     "Centaur",
     "Wedding Singer",
     "Jeweller",
