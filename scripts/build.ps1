@@ -50,6 +50,7 @@ $distDir = Join-Path $ProjectRoot 'dist'
 $distDataDir = Join-Path $distDir 'data'
 
 $professionsCsv = Join-Path $dataDir 'professions.csv'
+$animalsCsv = Join-Path $dataDir 'animals.csv'
 $statePath = Join-Path $dataDir 'state.json'
 $state = Read-Json $statePath
 $rawRows = Import-Csv -LiteralPath $professionsCsv
@@ -271,6 +272,29 @@ foreach ($row in $rows) {
   }
 }
 
+$animalRows = @()
+if (Test-Path -LiteralPath $animalsCsv) {
+  foreach ($row in (Import-Csv -LiteralPath $animalsCsv)) {
+    $animalRows += [pscustomobject]@{
+      no = [int]$row.No
+      animal = [string]$row.Animal
+      tier = [int]$row.Tier
+      categories = [string]$row.Categories
+      season = [string]$row.Season
+      formula1 = [string]$row.Formula1
+      formula1Categories = [string]$row.Formula1Categories
+      formula2 = [string]$row.Formula2
+      formula2Categories = [string]$row.Formula2Categories
+      recipe = [string]$row.Recipe
+      acquisition = [string]$row.Acquisition
+      altarRequired = ([string]$row.AltarRequired -eq 'True')
+      secret = ([string]$row.Secret -eq 'True')
+      mythical = ([string]$row.Mythical -eq 'True')
+      sourceTemplate = [string]$row.SourceTemplate
+    }
+  }
+}
+
 $summary = [pscustomobject]@{
   generatedAt = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
   total = $outputRows.Count
@@ -285,11 +309,33 @@ $summary = [pscustomobject]@{
   }
 }
 
+$animalSummary = [pscustomobject]@{
+  generatedAt = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
+  total = $animalRows.Count
+  secret = ($animalRows | Where-Object { $_.secret }).Count
+  mythical = ($animalRows | Where-Object { $_.mythical }).Count
+  altarOnly = ($animalRows | Where-Object { $_.altarRequired }).Count
+  tierOneTwo = ($animalRows | Where-Object { $_.tier -le 2 }).Count
+  source = @{
+    animals = 'data/animals.csv'
+    fandom = 'https://pixelpeople.fandom.com/wiki/Animals'
+  }
+  rules = @(
+    'Tier 1-2 animals can be obtained from animal packs, Heart rewards, the Pet Store, Animal Shelter gifts, or crafted at the Altar.',
+    'Tier 3 and above animals can only be crafted at the Altar.',
+    'Splicing animals consumes both required animals.',
+    'Some Cat and Dog formulas use any two animals from that category and may return a random result.'
+  )
+}
+
 New-Item -ItemType Directory -Force -Path $distDir, $distDataDir | Out-Null
 Copy-Item -LiteralPath (Join-Path $srcDir 'index.html') -Destination (Join-Path $distDir 'index.html') -Force
 Copy-Item -LiteralPath (Join-Path $srcDir 'styles.css') -Destination (Join-Path $distDir 'styles.css') -Force
 Copy-Item -LiteralPath (Join-Path $srcDir 'app.js') -Destination (Join-Path $distDir 'app.js') -Force
 Copy-Item -LiteralPath $professionsCsv -Destination (Join-Path $distDataDir 'professions.csv') -Force
+if (Test-Path -LiteralPath $animalsCsv) {
+  Copy-Item -LiteralPath $animalsCsv -Destination (Join-Path $distDataDir 'animals.csv') -Force
+}
 Copy-Item -LiteralPath $statePath -Destination (Join-Path $distDataDir 'state.json') -Force
 
 $payload = [pscustomobject]@{
@@ -298,7 +344,17 @@ $payload = [pscustomobject]@{
 }
 Write-Utf8NoBom (Join-Path $distDataDir 'professions.json') (($payload | ConvertTo-Json -Depth 8))
 $outputRows | Export-Csv -NoTypeInformation -Encoding UTF8 -Path (Join-Path $distDataDir 'profession_status.csv')
+
+$animalPayload = [pscustomobject]@{
+  summary = $animalSummary
+  rows = $animalRows
+}
+Write-Utf8NoBom (Join-Path $distDataDir 'animals.json') (($animalPayload | ConvertTo-Json -Depth 8))
+if ($animalRows.Count -gt 0) {
+  $animalRows | Export-Csv -NoTypeInformation -Encoding UTF8 -Path (Join-Path $distDataDir 'animal_status.csv')
+}
 Write-Utf8NoBom (Join-Path $distDir '.nojekyll') ''
 
 Write-Host "Built $distDir"
 Write-Host "Rows: $($summary.total); unlocked: $($summary.unlocked); buildings: $($summary.buildings); planned: $($summary.planned); blocked: $($summary.blocked)"
+Write-Host "Animals: $($animalSummary.total); secret: $($animalSummary.secret); mythical: $($animalSummary.mythical); altar-only: $($animalSummary.altarOnly)"

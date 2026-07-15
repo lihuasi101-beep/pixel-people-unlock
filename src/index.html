@@ -3,59 +3,107 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pixel People 职业解锁自查表</title>
+  <title>Pixel People 解锁与配方自查表</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <header>
-    <h1>Pixel People 职业解锁自查表</h1>
+    <h1>Pixel People 解锁与配方自查表</h1>
     <div id="meta" class="meta">加载数据中...</div>
     <div id="genes" class="meta"></div>
+    <nav class="tabs" aria-label="页面分类">
+      <button class="tab-button active" data-tab="professions" type="button">职业解锁</button>
+      <button class="tab-button" data-tab="animals" type="button">动物配方</button>
+    </nav>
   </header>
 
   <main>
-    <div class="stats">
-      <div class="stat"><b id="stat-total">-</b><span>职业总数</span></div>
-      <div class="stat"><b id="stat-unlocked">-</b><span>当前已解锁/推定已解锁</span></div>
-      <div class="stat"><b id="stat-buildings">-</b><span>当前已覆盖建筑</span></div>
-      <div class="stat"><b id="stat-planned">-</b><span>当前可规划解锁</span></div>
-      <div class="stat"><b id="stat-blocked">-</b><span>仍缺前置</span></div>
+    <div id="professionsView" class="tab-view active">
+      <div class="stats">
+        <div class="stat"><b id="stat-total">-</b><span>职业总数</span></div>
+        <div class="stat"><b id="stat-unlocked">-</b><span>当前已解锁/推定已解锁</span></div>
+        <div class="stat"><b id="stat-buildings">-</b><span>当前已覆盖建筑</span></div>
+        <div class="stat"><b id="stat-planned">-</b><span>当前可规划解锁</span></div>
+        <div class="stat"><b id="stat-blocked">-</b><span>仍缺前置</span></div>
+      </div>
+
+      <section>
+        <h2>优先新增建筑</h2>
+        <div class="table-wrap small-table">
+          <table>
+            <thead>
+              <tr><th>推荐顺位</th><th>职业</th><th>分类</th><th>合成与分类</th><th>新增建筑</th><th>工作建筑</th></tr>
+            </thead>
+            <tbody id="topNewRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>完整职业表</h2>
+        <div class="controls">
+          <input id="q" placeholder="搜索职业、分类、前置、前置分类、建筑、缺失前置" />
+          <select id="status"><option value="">全部状态</option></select>
+          <select id="category"><option value="">全部分类</option></select>
+        </div>
+        <div class="table-wrap">
+          <table id="professionTable">
+            <thead>
+              <tr>
+                <th>#</th><th>职业</th><th>分类</th>
+                <th>前置1</th><th>前置1分类</th><th>前置2</th><th>前置2分类</th>
+                <th>工作建筑</th><th>状态</th><th>当前可合成</th><th>当前新增建筑</th>
+                <th>推荐顺位</th><th>该步新增建筑</th><th>缺失前置</th>
+              </tr>
+            </thead>
+            <tbody id="professionRows"></tbody>
+          </table>
+        </div>
+        <p class="note">“当前新增建筑”是以你现在已解锁集合为基准；“该步新增建筑”是按推荐顺序执行到该职业时仍然首次出现的建筑。</p>
+      </section>
     </div>
 
-    <section>
-      <h2>优先新增建筑</h2>
-      <div class="table-wrap small-table">
-        <table>
-          <thead>
-            <tr><th>推荐顺位</th><th>职业</th><th>分类</th><th>合成与分类</th><th>新增建筑</th><th>工作建筑</th></tr>
-          </thead>
-          <tbody id="topNewRows"></tbody>
-        </table>
+    <div id="animalsView" class="tab-view">
+      <div class="stats">
+        <div class="stat"><b id="animal-total">-</b><span>动物总数</span></div>
+        <div class="stat"><b id="animal-secret">-</b><span>Secret 动物</span></div>
+        <div class="stat"><b id="animal-mythical">-</b><span>Mythical 动物</span></div>
+        <div class="stat"><b id="animal-altar">-</b><span>Altar 限定</span></div>
+        <div class="stat"><b id="animal-tier12">-</b><span>Tier 1-2</span></div>
       </div>
-    </section>
 
-    <section>
-      <h2>完整职业表</h2>
-      <div class="controls">
-        <input id="q" placeholder="搜索职业、分类、前置、前置分类、建筑、缺失前置" />
-        <select id="status"><option value="">全部状态</option></select>
-        <select id="category"><option value="">全部分类</option></select>
-      </div>
-      <div class="table-wrap">
-        <table id="professionTable">
-          <thead>
-            <tr>
-              <th>#</th><th>职业</th><th>分类</th>
-              <th>前置1</th><th>前置1分类</th><th>前置2</th><th>前置2分类</th>
-              <th>工作建筑</th><th>状态</th><th>当前可合成</th><th>当前新增建筑</th>
-              <th>推荐顺位</th><th>该步新增建筑</th><th>缺失前置</th>
-            </tr>
-          </thead>
-          <tbody id="professionRows"></tbody>
-        </table>
-      </div>
-      <p class="note">“当前新增建筑”是以你现在已解锁集合为基准；“该步新增建筑”是按推荐顺序执行到该职业时仍然首次出现的建筑。</p>
-    </section>
+      <section>
+        <h2>动物合成规则</h2>
+        <div class="rule-grid">
+          <div class="rule-card tier-low"><b>Tier 1-2</b><span>动物包、Heart、Pet Store、Animal Shelter 或 Altar</span></div>
+          <div class="rule-card tier-high"><b>Tier 3+</b><span>只能在 Altar 合成</span></div>
+          <div class="rule-card consume"><b>材料消耗</b><span>每次合成会消耗两个材料动物</span></div>
+          <div class="rule-card random"><b>随机公式</b><span>any Cat / any Dog 可能产出同分类随机动物</span></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>动物配方表</h2>
+        <div class="controls">
+          <input id="animalQ" placeholder="搜索动物、分类、公式材料、材料分类、季节" />
+          <select id="animalTier"><option value="">全部 Tier</option></select>
+          <select id="animalCategory"><option value="">全部分类</option></select>
+          <select id="animalAcquisition"><option value="">全部获取规则</option></select>
+        </div>
+        <div class="table-wrap">
+          <table id="animalTable">
+            <thead>
+              <tr>
+                <th>#</th><th>动物</th><th>Tier</th><th>分类</th><th>季节</th>
+                <th>公式1</th><th>公式1分类</th><th>公式2</th><th>公式2分类</th>
+                <th>获取规则</th>
+              </tr>
+            </thead>
+            <tbody id="animalRows"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   </main>
 
   <script src="./app.js"></script>

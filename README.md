@@ -7,6 +7,7 @@
 ```text
 data/
   professions.csv   # 职业基础数据：分类、合成前置、工作建筑
+  animals.csv       # 动物基础数据：Tier、分类、公式、材料分类、获取规则
   state.json        # 当前玩家状态：已解锁职业、目标范围
 src/
   index.html        # 页面骨架
@@ -14,6 +15,7 @@ src/
   app.js            # 前端渲染与筛选
 scripts/
   build.ps1         # 构建 dist/
+  update_animals.ps1 # 从 Fandom MediaWiki API 刷新 data/animals.csv
 dist/
   index.html        # 可部署产物
   data/*.json/csv   # 页面读取的数据
@@ -39,6 +41,14 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
 发布 `dist/` 目录即可。
 
+动物配方数据通常不需要随玩家状态高频改动。需要刷新 Wiki 动物库时运行：
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+.\scripts\update_animals.ps1
+.\scripts\build.ps1
+```
+
 ## 推荐托管方式
 
 长期方案推荐 GitHub Pages：
@@ -60,3 +70,6 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 - 构建时会递归补齐已解锁职业所需的普通职业前置。
 - 特殊基因只在已解锁职业配方中出现过时视为当前可用。
 - 推荐顺位按：当前可合成 -> 新增建筑数 -> 立即后续解锁数 -> 传递后续数 -> 工作建筑数 -> Wiki 表序。
+- 动物数据来自 Fandom `Animals` 页面的 `AnimalListTier1-2` 与 `AnimalListTier3-6` 模板。
+- 动物页展示字段包括：动物、Tier、分类、季节、公式 1/2、公式材料分类、获取规则。
+- 动物合成规则：Tier 1-2 可通过动物包/Heart/Pet Store/Animal Shelter 或 Altar 获取；Tier 3+ 只能在 Altar 合成；合成会消耗两个材料动物；`any Cat` / `any Dog` 是随机同分类公式。

@@ -29,6 +29,10 @@ function el(tag, className, text) {
   return node;
 }
 
+function splitValues(value) {
+  return String(value || '').split(',').map(v => v.trim()).filter(Boolean);
+}
+
 function categoryChip(text) {
   const chip = el('span', 'category-chip', text);
   const tone = text === '特殊基因' ? ['#fff7ed', '#7c2d12', '#fdba74', '#ea580c'] : toneFor(text || 'unknown');
@@ -41,22 +45,45 @@ function categoryChip(text) {
 
 function chipList(value, className) {
   const fragment = document.createDocumentFragment();
-  String(value || '').split(',').map(v => v.trim()).filter(Boolean).forEach(item => {
+  splitValues(value).forEach(item => {
     fragment.appendChild(el('span', className, item));
   });
   return fragment;
 }
 
-function formulaCell(name, category) {
+function categoryCell(categories) {
+  const td = el('td');
+  splitValues(categories).forEach(category => td.appendChild(categoryChip(category)));
+  return td;
+}
+
+function formulaCell(name) {
   const td = el('td');
   if (name && name !== 'None') td.appendChild(el('span', 'formula-chip', name));
   return td;
 }
 
-function categoryCell(category) {
-  const td = el('td');
-  if (category) td.appendChild(categoryChip(category));
-  return td;
+function fillSelect(id, values, labelFor = value => value) {
+  const select = document.getElementById(id);
+  const placeholder = select.options[0]?.textContent || '全部';
+  select.textContent = '';
+  const first = el('option', null, placeholder);
+  first.value = '';
+  select.appendChild(first);
+  values.forEach(value => {
+    const option = el('option', null, labelFor(value));
+    option.value = value;
+    select.appendChild(option);
+  });
+}
+
+function setupTabs() {
+  document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('.tab-button').forEach(item => item.classList.toggle('active', item === button));
+      document.querySelectorAll('.tab-view').forEach(view => view.classList.toggle('active', view.id === `${button.dataset.tab}View`));
+    });
+  });
 }
 
 function renderTopNew(rows) {
@@ -83,7 +110,7 @@ function renderTopNew(rows) {
     });
 }
 
-function renderRows(rows) {
+function renderProfessionRows(rows) {
   const tbody = document.getElementById('professionRows');
   tbody.textContent = '';
   rows.forEach(row => {
@@ -91,8 +118,8 @@ function renderRows(rows) {
     tr.dataset.status = row.status;
     tr.dataset.category = row.category;
     tr.append(el('td', null, row.no), el('td', null, row.profession), categoryCell(row.category));
-    tr.append(formulaCell(row.formula1, row.formula1Category), categoryCell(row.formula1Category));
-    tr.append(formulaCell(row.formula2, row.formula2Category), categoryCell(row.formula2Category));
+    tr.append(formulaCell(row.formula1), categoryCell(row.formula1Category));
+    tr.append(formulaCell(row.formula2), categoryCell(row.formula2Category));
     tr.append(el('td', null, row.workplaces));
     const status = el('td', 'status-cell');
     status.appendChild(el('span', `badge ${stateClass[row.status] || 'state-other'}`, row.status));
@@ -107,12 +134,7 @@ function renderRows(rows) {
   });
 }
 
-function fillSelect(id, values) {
-  const select = document.getElementById(id);
-  values.forEach(value => select.appendChild(el('option', null, value)));
-}
-
-function applyFilters() {
+function applyProfessionFilters() {
   const text = document.getElementById('q').value.trim().toLowerCase();
   const status = document.getElementById('status').value;
   const category = document.getElementById('category').value;
@@ -124,24 +146,85 @@ function applyFilters() {
   });
 }
 
+function renderAnimals(summary, rows) {
+  document.getElementById('animal-total').textContent = summary.total;
+  document.getElementById('animal-secret').textContent = summary.secret;
+  document.getElementById('animal-mythical').textContent = summary.mythical;
+  document.getElementById('animal-altar').textContent = summary.altarOnly;
+  document.getElementById('animal-tier12').textContent = summary.tierOneTwo;
+
+  fillSelect('animalTier', [...new Set(rows.map(row => String(row.tier)))].sort((a, b) => Number(a) - Number(b)), value => `Tier ${value}`);
+  fillSelect('animalCategory', [...new Set(rows.flatMap(row => splitValues(row.categories)))].sort());
+  fillSelect('animalAcquisition', [...new Set(rows.map(row => row.acquisition))].sort());
+
+  const tbody = document.getElementById('animalRows');
+  tbody.textContent = '';
+  rows.forEach(row => {
+    const tr = el('tr');
+    tr.dataset.tier = String(row.tier);
+    tr.dataset.categories = row.categories;
+    tr.dataset.acquisition = row.acquisition;
+    tr.append(el('td', null, row.no), el('td', null, row.animal), el('td', null, `Tier ${row.tier}`));
+    tr.append(categoryCell(row.categories), el('td', null, row.season || row.acquisition));
+    tr.append(formulaCell(row.formula1), categoryCell(row.formula1Categories));
+    tr.append(formulaCell(row.formula2), categoryCell(row.formula2Categories));
+    tr.append(el('td', null, row.acquisition));
+    tbody.appendChild(tr);
+  });
+}
+
+function applyAnimalFilters() {
+  const text = document.getElementById('animalQ').value.trim().toLowerCase();
+  const tier = document.getElementById('animalTier').value;
+  const category = document.getElementById('animalCategory').value;
+  const acquisition = document.getElementById('animalAcquisition').value;
+  document.querySelectorAll('#animalRows tr').forEach(row => {
+    const categories = splitValues(row.dataset.categories);
+    const okText = !text || row.innerText.toLowerCase().includes(text);
+    const okTier = !tier || row.dataset.tier === tier;
+    const okCategory = !category || categories.includes(category);
+    const okAcquisition = !acquisition || row.dataset.acquisition === acquisition;
+    row.classList.toggle('hidden', !(okText && okTier && okCategory && okAcquisition));
+  });
+}
+
+async function getJson(path) {
+  const response = await fetch(path, { cache: 'no-store' });
+  if (!response.ok) throw new Error(`${path} ${response.status}`);
+  return response.json();
+}
+
 async function main() {
-  const response = await fetch('./data/professions.json', { cache: 'no-store' });
-  const payload = await response.json();
-  const { summary, rows } = payload;
-  document.getElementById('meta').textContent = `生成时间：${summary.generatedAt} · 数据源：data/professions.csv + data/state.json`;
+  setupTabs();
+  const [professionPayload, animalPayload] = await Promise.all([
+    getJson('./data/professions.json'),
+    getJson('./data/animals.json')
+  ]);
+  const { summary, rows } = professionPayload;
+  const animalSummary = animalPayload.summary;
+  const animalRows = animalPayload.rows;
+
+  document.getElementById('meta').textContent = `生成时间：${summary.generatedAt} · 数据源：data/professions.csv + data/state.json + data/animals.csv`;
   document.getElementById('genes').textContent = `当前可用特殊基因：${summary.availableGenes.join(', ') || '无'}`;
   document.getElementById('stat-total').textContent = summary.total;
   document.getElementById('stat-unlocked').textContent = summary.unlocked;
   document.getElementById('stat-buildings').textContent = summary.buildings;
   document.getElementById('stat-planned').textContent = summary.planned;
   document.getElementById('stat-blocked').textContent = summary.blocked;
+
   fillSelect('status', [...new Set(rows.map(row => row.status))].sort());
   fillSelect('category', [...new Set(rows.map(row => row.category))].sort());
   renderTopNew(rows);
-  renderRows(rows);
-  document.getElementById('q').addEventListener('input', applyFilters);
-  document.getElementById('status').addEventListener('change', applyFilters);
-  document.getElementById('category').addEventListener('change', applyFilters);
+  renderProfessionRows(rows);
+  renderAnimals(animalSummary, animalRows);
+
+  document.getElementById('q').addEventListener('input', applyProfessionFilters);
+  document.getElementById('status').addEventListener('change', applyProfessionFilters);
+  document.getElementById('category').addEventListener('change', applyProfessionFilters);
+  document.getElementById('animalQ').addEventListener('input', applyAnimalFilters);
+  document.getElementById('animalTier').addEventListener('change', applyAnimalFilters);
+  document.getElementById('animalCategory').addEventListener('change', applyAnimalFilters);
+  document.getElementById('animalAcquisition').addEventListener('change', applyAnimalFilters);
 }
 
 main().catch(error => {
