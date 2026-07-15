@@ -129,6 +129,11 @@ foreach ($name in $unlocked) {
   if (Is-SpecialGene $row.formula1 $row.formula1Category) { [void]$availableGenes.Add($row.formula1) }
   if (Is-SpecialGene $row.formula2 $row.formula2Category) { [void]$availableGenes.Add($row.formula2) }
 }
+if ($state.PSObject.Properties.Name -contains 'explicitUnlockedGenes') {
+  foreach ($gene in $state.explicitUnlockedGenes) {
+    if (-not [string]::IsNullOrWhiteSpace([string]$gene)) { [void]$availableGenes.Add([string]$gene) }
+  }
+}
 
 $baseBuildings = [System.Collections.Generic.HashSet[string]]::new()
 foreach ($name in $unlocked) {

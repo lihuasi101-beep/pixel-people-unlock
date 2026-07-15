@@ -32,6 +32,14 @@ dist/
 ]
 ```
 
+新解锁特殊基因时，写入 `explicitUnlockedGenes`：
+
+```json
+"explicitUnlockedGenes": [
+  "Romantic"
+]
+```
+
 然后运行：
 
 ```powershell
@@ -67,8 +75,9 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
 - `unlockThrough` 是基准线，例如 `"Wrestler"`。
 - `explicitUnlocked` 是用户明确确认的已解锁职业。
+- `explicitUnlockedGenes` 是用户明确确认的已解锁特殊基因。
 - 构建时会递归补齐已解锁职业所需的普通职业前置。
-- 特殊基因只在已解锁职业配方中出现过时视为当前可用。
+- 特殊基因在 `explicitUnlockedGenes` 中出现，或在已解锁职业配方中出现过时，视为当前可用。
 - 推荐顺位按：当前可合成 -> 新增建筑数 -> 立即后续解锁数 -> 传递后续数 -> 工作建筑数 -> Wiki 表序。
 - 动物数据来自 Fandom `Animals` 页面的 `AnimalListTier1-2` 与 `AnimalListTier3-6` 模板。
 - 动物页展示字段包括：动物、Tier、分类、季节、公式 1/2、公式材料分类、获取规则。

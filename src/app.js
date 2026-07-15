@@ -73,6 +73,15 @@ function secretAdviceCell(row) {
   return td;
 }
 
+function materialDetail(name, categories) {
+  const detail = el('div', 'material-detail');
+  detail.appendChild(el('span', 'material-name', name || '未知材料'));
+  const chips = el('div', 'material-categories');
+  splitValues(categories || '未知').forEach(category => chips.appendChild(categoryChip(category)));
+  detail.appendChild(chips);
+  return detail;
+}
+
 function fillSelect(id, values, labelFor = value => value) {
   const select = document.getElementById(id);
   const placeholder = select.options[0]?.textContent || '全部';
@@ -201,10 +210,10 @@ function renderSecretRecommendations(rows) {
       formula.appendChild(el('span', 'formula-part', row.formula2));
       tr.appendChild(formula);
 
-      const materialCategories = el('td');
-      splitValues(row.formula1Categories || '未知').forEach(category => materialCategories.appendChild(categoryChip(category)));
-      splitValues(row.formula2Categories || '未知').forEach(category => materialCategories.appendChild(categoryChip(category)));
-      tr.appendChild(materialCategories);
+      const materialCell = el('td', 'material-detail-cell');
+      materialCell.appendChild(materialDetail(row.formula1, row.formula1Categories));
+      materialCell.appendChild(materialDetail(row.formula2, row.formula2Categories));
+      tr.appendChild(materialCell);
 
       tr.append(el('td', null, `基础材料 ${row.baseMaterialCost} · 材料复用 ${row.materialUseScore}`));
       const reason = el('td');

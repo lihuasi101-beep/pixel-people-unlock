@@ -36,6 +36,9 @@
     "Gambler",
     "Barbecuer"
   ],
+  "explicitUnlockedGenes": [
+    "Romantic"
+  ],
   "explicitPending": [
     "Matador",
     "Apprentice",
@@ -52,6 +55,7 @@
   },
   "notes": [
     "unlockThrough is a convenience baseline only; explicitUnlocked is the player's confirmed state.",
-    "Build adds ordinary-profession prerequisites for unlocked professions; special genes are treated as available only when implied by confirmed unlocked formulas."
+    "Build adds ordinary-profession prerequisites for unlocked professions.",
+    "explicitUnlockedGenes stores confirmed special genes that are available even before a confirmed unlocked profession implies them."
   ]
 }
