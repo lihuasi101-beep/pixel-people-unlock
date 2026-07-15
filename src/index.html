@@ -69,7 +69,7 @@
         <div class="stat"><b id="animal-secret">-</b><span>Secret 动物</span></div>
         <div class="stat"><b id="animal-mythical">-</b><span>Mythical 动物</span></div>
         <div class="stat"><b id="animal-altar">-</b><span>Altar 限定</span></div>
-        <div class="stat"><b id="animal-tier12">-</b><span>Tier 1-2</span></div>
+        <div class="stat"><b id="animal-recommended-secret">-</b><span>推荐 Secret</span></div>
       </div>
 
       <section>
@@ -80,6 +80,22 @@
           <div class="rule-card consume"><b>材料消耗</b><span>每次合成会消耗两个材料动物</span></div>
           <div class="rule-card random"><b>随机公式</b><span>any Cat / any Dog 可能产出同分类随机动物</span></div>
         </div>
+      </section>
+
+      <section>
+        <h2>推荐 Secret 消耗品</h2>
+        <div class="table-wrap small-table">
+          <table id="secretRecommendationTable">
+            <thead>
+              <tr>
+                <th>推荐顺位</th><th>Secret 动物</th><th>Tier</th><th>分类</th>
+                <th>合成公式</th><th>材料分类</th><th>成本</th><th>推荐理由</th>
+              </tr>
+            </thead>
+            <tbody id="secretRecommendationRows"></tbody>
+          </table>
+        </div>
+        <p class="note">推荐口径：Tier 3 Secret、只消耗两个 Tier 1-2 材料、成品不作为后续配方材料；仍需按你当前库存选择材料最充足的一项。</p>
       </section>
 
       <section>
@@ -96,7 +112,7 @@
               <tr>
                 <th>#</th><th>动物</th><th>Tier</th><th>分类</th><th>季节</th>
                 <th>公式1</th><th>公式1分类</th><th>公式2</th><th>公式2分类</th>
-                <th>获取规则</th>
+                <th>Secret建议</th><th>获取规则</th>
               </tr>
             </thead>
             <tbody id="animalRows"></tbody>

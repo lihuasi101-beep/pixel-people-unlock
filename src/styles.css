@@ -127,6 +127,9 @@ tr:hover td { background:#fbfcfe; }
 .state-plan { color:#064e3b; background:#ccfbf1; border-color:#5eead4; }
 .state-blocked { color:#7f1d1d; background:#fee2e2; border-color:#fecaca; }
 .state-other { color:#713f12; background:#fef3c7; border-color:#fde68a; }
+.secret-consume { color:#064e3b; background:#ccfbf1; border-color:#5eead4; }
+.secret-hold { color:#7f1d1d; background:#fee2e2; border-color:#fecaca; }
+.secret-caution { color:#713f12; background:#fef3c7; border-color:#fde68a; }
 .formula-chip { background:#fff; color:#374151; border-color:#e4c474; font-weight:600; }
 .category-chip {
   background:var(--chip-bg,#edf2ff);
@@ -171,7 +174,7 @@ tr:hover td { background:#fbfcfe; }
 #professionTable th:nth-child(11), #professionTable td:nth-child(11),
 #professionTable th:nth-child(13), #professionTable td:nth-child(13) { background:var(--new); }
 #professionTable th:nth-child(14), #professionTable td:nth-child(14) { background:var(--missing); }
-#animalTable { min-width:1280px; }
+#animalTable { min-width:1460px; }
 #animalTable th:nth-child(6),
 #animalTable th:nth-child(7),
 #animalTable th:nth-child(8),
@@ -181,7 +184,22 @@ tr:hover td { background:#fbfcfe; }
 #animalTable td:nth-child(8),
 #animalTable td:nth-child(9) { background:var(--formula); }
 #animalTable th:nth-child(6), #animalTable td:nth-child(6) { border-left:3px solid var(--formula-line); }
-#animalTable th:nth-child(10), #animalTable td:nth-child(10) { background:#f8fafc; }
+#animalTable th:nth-child(10), #animalTable td:nth-child(10) { background:#f0fdfa; }
+#animalTable th:nth-child(11), #animalTable td:nth-child(11) { background:#f8fafc; }
+#secretRecommendationTable { min-width:1200px; }
+#secretRecommendationTable th:nth-child(5),
+#secretRecommendationTable th:nth-child(6),
+#secretRecommendationTable td:nth-child(5),
+#secretRecommendationTable td:nth-child(6) { background:var(--formula); }
+#secretRecommendationTable th:nth-child(7),
+#secretRecommendationTable td:nth-child(7) { background:#f8fafc; }
+#secretRecommendationTable th:nth-child(8),
+#secretRecommendationTable td:nth-child(8) { background:#f0fdfa; }
+.secret-recommended-row td:first-child,
+.secret-recommended-row td:nth-child(2),
+.secret-recommended-row td:nth-child(3) { background:#ecfdf5; }
+.secret-advice-cell { min-width:170px; }
+.cell-note { color:var(--muted); font-size:12px; line-height:1.45; margin-top:4px; max-width:320px; }
 .signal-cell:not(:empty) { font-weight:700; color:#0f766e; }
 .status-cell { white-space:nowrap; }
 .note { color:var(--muted); font-size:13px; line-height:1.6; margin:8px 0 0; }

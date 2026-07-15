@@ -63,6 +63,16 @@ function formulaCell(name) {
   return td;
 }
 
+function secretAdviceCell(row) {
+  const td = el('td', 'secret-advice-cell');
+  if (!row.secretRecommendationLevel) return td;
+  const className = row.secretRecommendationRank ? 'secret-consume' : row.secretRecommendationLevel === '建议保留' ? 'secret-hold' : 'secret-caution';
+  const label = row.secretRecommendationRank ? `推荐 #${row.secretRecommendationRank}` : row.secretRecommendationLevel;
+  td.appendChild(el('span', `badge ${className}`, label));
+  if (row.secretRecommendationReason) td.appendChild(el('div', 'cell-note', row.secretRecommendationReason));
+  return td;
+}
+
 function fillSelect(id, values, labelFor = value => value) {
   const select = document.getElementById(id);
   const placeholder = select.options[0]?.textContent || '全部';
@@ -151,11 +161,12 @@ function renderAnimals(summary, rows) {
   document.getElementById('animal-secret').textContent = summary.secret;
   document.getElementById('animal-mythical').textContent = summary.mythical;
   document.getElementById('animal-altar').textContent = summary.altarOnly;
-  document.getElementById('animal-tier12').textContent = summary.tierOneTwo;
+  document.getElementById('animal-recommended-secret').textContent = summary.recommendedSecret;
 
   fillSelect('animalTier', [...new Set(rows.map(row => String(row.tier)))].sort((a, b) => Number(a) - Number(b)), value => `Tier ${value}`);
   fillSelect('animalCategory', [...new Set(rows.flatMap(row => splitValues(row.categories)))].sort());
   fillSelect('animalAcquisition', [...new Set(rows.map(row => row.acquisition))].sort());
+  renderSecretRecommendations(rows);
 
   const tbody = document.getElementById('animalRows');
   tbody.textContent = '';
@@ -164,13 +175,44 @@ function renderAnimals(summary, rows) {
     tr.dataset.tier = String(row.tier);
     tr.dataset.categories = row.categories;
     tr.dataset.acquisition = row.acquisition;
+    if (row.secretRecommendationRank) tr.classList.add('secret-recommended-row');
     tr.append(el('td', null, row.no), el('td', null, row.animal), el('td', null, `Tier ${row.tier}`));
     tr.append(categoryCell(row.categories), el('td', null, row.season || row.acquisition));
     tr.append(formulaCell(row.formula1), categoryCell(row.formula1Categories));
     tr.append(formulaCell(row.formula2), categoryCell(row.formula2Categories));
-    tr.append(el('td', null, row.acquisition));
+    tr.append(secretAdviceCell(row), el('td', null, row.acquisition));
     tbody.appendChild(tr);
   });
+}
+
+function renderSecretRecommendations(rows) {
+  const tbody = document.getElementById('secretRecommendationRows');
+  tbody.textContent = '';
+  rows.filter(row => row.secretRecommendationRank)
+    .sort((a, b) => Number(a.secretRecommendationRank) - Number(b.secretRecommendationRank))
+    .forEach(row => {
+      const tr = el('tr');
+      tr.append(el('td', null, row.secretRecommendationRank), el('td', null, row.animal), el('td', null, `Tier ${row.tier}`));
+      tr.append(categoryCell(row.categories));
+
+      const formula = el('td', 'formula-summary');
+      formula.appendChild(el('span', 'formula-part', row.formula1));
+      formula.appendChild(document.createTextNode(' + '));
+      formula.appendChild(el('span', 'formula-part', row.formula2));
+      tr.appendChild(formula);
+
+      const materialCategories = el('td');
+      splitValues(row.formula1Categories || '未知').forEach(category => materialCategories.appendChild(categoryChip(category)));
+      splitValues(row.formula2Categories || '未知').forEach(category => materialCategories.appendChild(categoryChip(category)));
+      tr.appendChild(materialCategories);
+
+      tr.append(el('td', null, `基础材料 ${row.baseMaterialCost} · 材料复用 ${row.materialUseScore}`));
+      const reason = el('td');
+      reason.appendChild(el('span', 'badge secret-consume', '推荐消耗'));
+      reason.appendChild(el('div', 'cell-note', row.secretRecommendationReason));
+      tr.appendChild(reason);
+      tbody.appendChild(tr);
+    });
 }
 
 function applyAnimalFilters() {

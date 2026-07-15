@@ -44,6 +44,22 @@ function Resolve-ConfiguredName([string]$Name, $Aliases) {
   return $Name
 }
 
+function Get-AnimalBaseCost([string]$Animal, $AnimalByName, $Seen) {
+  if ([string]::IsNullOrWhiteSpace($Animal) -or -not $AnimalByName.ContainsKey($Animal)) { return 1 }
+  $row = $AnimalByName[$Animal]
+  if ($row.tier -le 2) { return 1 }
+  if ($Seen.ContainsKey($Animal)) { return 999 }
+  $nextSeen = @{}
+  foreach ($key in $Seen.Keys) { $nextSeen[$key] = $true }
+  $nextSeen[$Animal] = $true
+  return (Get-AnimalBaseCost $row.formula1 $AnimalByName $nextSeen) + (Get-AnimalBaseCost $row.formula2 $AnimalByName $nextSeen)
+}
+
+function Get-CountOrZero($Map, [string]$Key) {
+  if ($Map.ContainsKey($Key)) { return [int]$Map[$Key] }
+  return 0
+}
+
 $dataDir = Join-Path $ProjectRoot 'data'
 $srcDir = Join-Path $ProjectRoot 'src'
 $distDir = Join-Path $ProjectRoot 'dist'
@@ -295,6 +311,68 @@ if (Test-Path -LiteralPath $animalsCsv) {
   }
 }
 
+$animalByName = @{}
+foreach ($row in $animalRows) { $animalByName[$row.animal] = $row }
+
+$usedAsMaterial = @{}
+foreach ($row in $animalRows) {
+  foreach ($formula in @($row.formula1, $row.formula2)) {
+    if ($animalByName.ContainsKey($formula)) {
+      if (-not $usedAsMaterial.ContainsKey($formula)) { $usedAsMaterial[$formula] = 0 }
+      $usedAsMaterial[$formula]++
+    }
+  }
+}
+
+$secretCandidates = @()
+foreach ($row in $animalRows) {
+  $baseCost = Get-AnimalBaseCost $row.animal $animalByName @{}
+  $usedBy = Get-CountOrZero $usedAsMaterial $row.animal
+  $formula1Use = Get-CountOrZero $usedAsMaterial $row.formula1
+  $formula2Use = Get-CountOrZero $usedAsMaterial $row.formula2
+  $materialUseScore = $formula1Use + $formula2Use
+  $formula1Tier = if ($animalByName.ContainsKey($row.formula1)) { [int]$animalByName[$row.formula1].tier } else { 0 }
+  $formula2Tier = if ($animalByName.ContainsKey($row.formula2)) { [int]$animalByName[$row.formula2].tier } else { 0 }
+  $formulaTierScore = $formula1Tier + $formula2Tier
+  $level = ''
+  $reason = ''
+
+  if ($row.secret) {
+    if ($row.tier -eq 3 -and $baseCost -eq 2 -and $usedBy -eq 0) {
+      $level = '推荐消耗'
+      $reason = 'Tier 3 Secret；只消耗两个 Tier 1-2 材料；成品不作为后续配方材料。'
+      $secretCandidates += $row
+    } elseif ($usedBy -gt 0) {
+      $level = '建议保留'
+      $reason = "后续 $usedBy 个配方会用到该动物。"
+    } elseif ($baseCost -gt 2) {
+      $level = '成本偏高'
+      $reason = "递归基础材料成本为 $baseCost，高于普通 Tier 3 Secret。"
+    } else {
+      $level = '可用'
+      $reason = '可作为 Secret 动物，但不在低成本首选列表。'
+    }
+  }
+
+  $row | Add-Member -NotePropertyName baseMaterialCost -NotePropertyValue $baseCost -Force
+  $row | Add-Member -NotePropertyName usedByCount -NotePropertyValue $usedBy -Force
+  $row | Add-Member -NotePropertyName materialUseScore -NotePropertyValue $materialUseScore -Force
+  $row | Add-Member -NotePropertyName formulaTierScore -NotePropertyValue $formulaTierScore -Force
+  $row | Add-Member -NotePropertyName secretRecommendationRank -NotePropertyValue $null -Force
+  $row | Add-Member -NotePropertyName secretRecommendationLevel -NotePropertyValue $level -Force
+  $row | Add-Member -NotePropertyName secretRecommendationReason -NotePropertyValue $reason -Force
+}
+
+$rank = 0
+foreach ($row in ($secretCandidates | Sort-Object `
+    @{ Expression = 'baseMaterialCost'; Descending = $false },
+    @{ Expression = 'materialUseScore'; Descending = $false },
+    @{ Expression = 'formulaTierScore'; Descending = $false },
+    @{ Expression = 'animal'; Descending = $false })) {
+  $rank++
+  $row.secretRecommendationRank = $rank
+}
+
 $summary = [pscustomobject]@{
   generatedAt = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
   total = $outputRows.Count
@@ -316,6 +394,7 @@ $animalSummary = [pscustomobject]@{
   mythical = ($animalRows | Where-Object { $_.mythical }).Count
   altarOnly = ($animalRows | Where-Object { $_.altarRequired }).Count
   tierOneTwo = ($animalRows | Where-Object { $_.tier -le 2 }).Count
+  recommendedSecret = ($animalRows | Where-Object { $_.secretRecommendationRank }).Count
   source = @{
     animals = 'data/animals.csv'
     fandom = 'https://pixelpeople.fandom.com/wiki/Animals'
