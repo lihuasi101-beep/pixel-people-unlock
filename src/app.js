@@ -134,6 +134,8 @@ function renderProfessionRows(rows) {
   tbody.textContent = '';
   rows.forEach(row => {
     const tr = el('tr');
+    tr.dataset.no = String(row.no);
+    tr.dataset.profession = row.profession;
     tr.dataset.status = row.status;
     tr.dataset.category = row.category;
     tr.append(el('td', null, row.no), el('td', null, row.profession), categoryCell(row.category));
@@ -153,16 +155,35 @@ function renderProfessionRows(rows) {
   });
 }
 
+function professionSearchRank(row, text) {
+  if (!text) return Number(row.dataset.no);
+  const profession = (row.dataset.profession || '').toLowerCase();
+  if (profession === text) return 0;
+  if (profession.startsWith(text)) return 1;
+  if (profession.split(/\s+/).some(part => part.startsWith(text))) return 2;
+  if (profession.includes(text)) return 3;
+  return 20;
+}
+
 function applyProfessionFilters() {
   const text = document.getElementById('q').value.trim().toLowerCase();
   const status = document.getElementById('status').value;
   const category = document.getElementById('category').value;
-  document.querySelectorAll('#professionRows tr').forEach(row => {
-    const okText = !text || row.innerText.toLowerCase().includes(text);
+  const tbody = document.getElementById('professionRows');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.forEach(row => {
+    const okText = !text || row.textContent.toLowerCase().includes(text);
     const okStatus = !status || row.dataset.status === status;
     const okCategory = !category || row.dataset.category === category;
     row.classList.toggle('hidden', !(okText && okStatus && okCategory));
   });
+  rows.sort((a, b) => {
+    const aHidden = a.classList.contains('hidden') ? 1 : 0;
+    const bHidden = b.classList.contains('hidden') ? 1 : 0;
+    return aHidden - bHidden ||
+      professionSearchRank(a, text) - professionSearchRank(b, text) ||
+      Number(a.dataset.no) - Number(b.dataset.no);
+  }).forEach(row => tbody.appendChild(row));
 }
 
 function renderAnimals(summary, rows) {
