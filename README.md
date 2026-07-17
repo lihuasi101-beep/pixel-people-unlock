@@ -80,7 +80,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 - 特殊基因在 `explicitUnlockedGenes` 中出现，或在已解锁职业配方中出现过时，视为当前可用。
 - 推荐顺位按：当前可合成 -> 新增建筑数 -> 立即后续解锁数 -> 传递后续数 -> 工作建筑数 -> Wiki 表序。
 - 动物数据来自 Fandom `Animals` 页面的 `AnimalListTier1-2` 与 `AnimalListTier3-6` 模板。
-- 动物页展示字段包括：动物缩略图、动物、Tier、分类、季节、公式 1/2、公式材料缩略图、公式材料分类、获取规则。
-- `update_animals.ps1` 会通过 Fandom `pageimages` API 写入动物缩略图 URL；没有返回图片的动物会在页面显示占位缩略图。
+- 动物页展示字段包括：动物、Tier、分类、季节、公式 1/2、公式材料分类、获取规则。
+- 动物名和公式材料名会跳转到对应 Fandom 页面，便于按需查看图片和详情。
 - 动物合成规则：Tier 1-2 可通过动物包/Heart/Pet Store/Animal Shelter 或 Altar 获取；Tier 3+ 只能在 Altar 合成；合成会消耗两个材料动物；`any Cat` / `any Dog` 是随机同分类公式。
 - “推荐 Secret 消耗品”用于 `any Secret animal` 任务：优先标记 Tier 3 Secret、递归基础材料成本为 2、且成品不作为后续配方材料的动物；完整动物表会同时展示建议保留和成本偏高的 Secret。

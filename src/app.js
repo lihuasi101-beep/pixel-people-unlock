@@ -65,23 +65,13 @@ function formulaCell(name) {
 
 function animalIdentityCell(row) {
   const td = el('td', 'animal-identity-cell');
-  const wrapper = el(row.pageUrl ? 'a' : 'span', 'animal-identity');
+  const wrapper = el(row.pageUrl ? 'a' : 'span', 'animal-link');
   if (row.pageUrl) {
     wrapper.href = row.pageUrl;
     wrapper.target = '_blank';
     wrapper.rel = 'noreferrer';
   }
-  if (row.imageUrl) {
-    const image = el('img', 'animal-thumb');
-    image.src = row.imageUrl;
-    image.alt = row.animal;
-    image.loading = 'lazy';
-    image.decoding = 'async';
-    wrapper.appendChild(image);
-  } else {
-    wrapper.appendChild(el('span', 'animal-thumb animal-thumb-placeholder', row.animal ? row.animal.slice(0, 1) : '?'));
-  }
-  wrapper.appendChild(el('span', 'animal-name', row.animal));
+  wrapper.textContent = row.animal;
   td.appendChild(wrapper);
   return td;
 }
@@ -103,14 +93,6 @@ function animalFormulaChip(name, animalByName) {
     wrapper.href = row.pageUrl;
     wrapper.target = '_blank';
     wrapper.rel = 'noreferrer';
-  }
-  if (row?.imageUrl) {
-    const image = el('img', 'animal-mini-thumb');
-    image.src = row.imageUrl;
-    image.alt = name;
-    image.loading = 'lazy';
-    image.decoding = 'async';
-    wrapper.appendChild(image);
   }
   wrapper.appendChild(el('span', null, name));
   return wrapper;

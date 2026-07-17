@@ -76,25 +76,10 @@ function Get-FormulaCategories([string]$Formula, $ByName) {
   return ''
 }
 
-function Get-AnimalPageImages($Names) {
-  $result = @{}
-  $batchSize = 40
-  for ($i = 0; $i -lt $Names.Count; $i += $batchSize) {
-    $end = [Math]::Min($i + $batchSize - 1, $Names.Count - 1)
-    $batch = @($Names[$i..$end])
-    $titles = [uri]::EscapeDataString(($batch -join '|'))
-    $url = "https://pixelpeople.fandom.com/api.php?action=query&titles=$titles&prop=pageimages|info&pithumbsize=96&inprop=url&format=json"
-    $response = Invoke-WebRequest -UseBasicParsing $url -Headers @{ 'User-Agent' = 'PixelPeopleUnlockTracker/1.0' }
-    $payload = $response.Content | ConvertFrom-Json
-    foreach ($pageProp in $payload.query.pages.PSObject.Properties) {
-      $page = $pageProp.Value
-      $result[[string]$page.title] = [pscustomobject]@{
-        ImageUrl = if ($page.thumbnail) { [string]$page.thumbnail.source } else { '' }
-        PageUrl = if ($page.fullurl) { [string]$page.fullurl } else { '' }
-      }
-    }
-  }
-  return $result
+function Get-WikiPageUrl([string]$Title) {
+  if ([string]::IsNullOrWhiteSpace($Title)) { return '' }
+  $path = [uri]::EscapeDataString($Title.Replace(' ', '_'))
+  return "https://pixelpeople.fandom.com/wiki/$path"
 }
 
 $dataDir = Join-Path $ProjectRoot 'data'
@@ -145,7 +130,6 @@ foreach ($item in $rawAnimals) {
 
 $byName = @{}
 foreach ($row in $baseRows) { $byName[$row.Animal] = $row }
-$pageImages = Get-AnimalPageImages @($baseRows | ForEach-Object { $_.Animal })
 
 $animals = @()
 foreach ($row in $baseRows) {
@@ -158,8 +142,7 @@ foreach ($row in $baseRows) {
   $animals += [pscustomobject]@{
     No = $row.No
     Animal = $row.Animal
-    ImageUrl = if ($pageImages.ContainsKey($row.Animal)) { $pageImages[$row.Animal].ImageUrl } else { '' }
-    PageUrl = if ($pageImages.ContainsKey($row.Animal)) { $pageImages[$row.Animal].PageUrl } else { '' }
+    PageUrl = Get-WikiPageUrl $row.Animal
     Tier = $row.Tier
     Categories = $row.Categories
     Season = $row.Season
