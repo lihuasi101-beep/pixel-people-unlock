@@ -236,6 +236,8 @@ function renderAnimals(summary, rows) {
   tbody.textContent = '';
   rows.forEach(row => {
     const tr = el('tr');
+    tr.dataset.no = String(row.no);
+    tr.dataset.animal = row.animal;
     tr.dataset.tier = String(row.tier);
     tr.dataset.categories = row.categories;
     tr.dataset.acquisition = row.acquisition;
@@ -279,19 +281,38 @@ function renderSecretRecommendations(rows, animalByName) {
     });
 }
 
+function animalSearchRank(row, text) {
+  if (!text) return Number(row.dataset.no);
+  const animal = (row.dataset.animal || '').toLowerCase();
+  if (animal === text) return 0;
+  if (animal.startsWith(text)) return 1;
+  if (animal.split(/\s+/).some(part => part.startsWith(text))) return 2;
+  if (animal.includes(text)) return 3;
+  return 20;
+}
+
 function applyAnimalFilters() {
   const text = document.getElementById('animalQ').value.trim().toLowerCase();
   const tier = document.getElementById('animalTier').value;
   const category = document.getElementById('animalCategory').value;
   const acquisition = document.getElementById('animalAcquisition').value;
-  document.querySelectorAll('#animalRows tr').forEach(row => {
+  const tbody = document.getElementById('animalRows');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.forEach(row => {
     const categories = splitValues(row.dataset.categories);
-    const okText = !text || row.innerText.toLowerCase().includes(text);
+    const okText = !text || row.textContent.toLowerCase().includes(text);
     const okTier = !tier || row.dataset.tier === tier;
     const okCategory = !category || categories.includes(category);
     const okAcquisition = !acquisition || row.dataset.acquisition === acquisition;
     row.classList.toggle('hidden', !(okText && okTier && okCategory && okAcquisition));
   });
+  rows.sort((a, b) => {
+    const aHidden = a.classList.contains('hidden') ? 1 : 0;
+    const bHidden = b.classList.contains('hidden') ? 1 : 0;
+    return aHidden - bHidden ||
+      animalSearchRank(a, text) - animalSearchRank(b, text) ||
+      Number(a.dataset.no) - Number(b.dataset.no);
+  }).forEach(row => tbody.appendChild(row));
 }
 
 async function getJson(path) {
