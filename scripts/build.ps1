@@ -299,6 +299,8 @@ if (Test-Path -LiteralPath $animalsCsv) {
     $animalRows += [pscustomobject]@{
       no = [int]$row.No
       animal = [string]$row.Animal
+      imageUrl = [string]$row.ImageUrl
+      pageUrl = [string]$row.PageUrl
       tier = [int]$row.Tier
       categories = [string]$row.Categories
       season = [string]$row.Season

@@ -63,6 +63,29 @@ function formulaCell(name) {
   return td;
 }
 
+function animalIdentityCell(row) {
+  const td = el('td', 'animal-identity-cell');
+  const wrapper = el(row.pageUrl ? 'a' : 'span', 'animal-identity');
+  if (row.pageUrl) {
+    wrapper.href = row.pageUrl;
+    wrapper.target = '_blank';
+    wrapper.rel = 'noreferrer';
+  }
+  if (row.imageUrl) {
+    const image = el('img', 'animal-thumb');
+    image.src = row.imageUrl;
+    image.alt = row.animal;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    wrapper.appendChild(image);
+  } else {
+    wrapper.appendChild(el('span', 'animal-thumb animal-thumb-placeholder', row.animal ? row.animal.slice(0, 1) : '?'));
+  }
+  wrapper.appendChild(el('span', 'animal-name', row.animal));
+  td.appendChild(wrapper);
+  return td;
+}
+
 function secretAdviceCell(row) {
   const td = el('td', 'secret-advice-cell');
   if (!row.secretRecommendationLevel) return td;
@@ -73,9 +96,37 @@ function secretAdviceCell(row) {
   return td;
 }
 
-function materialDetail(name, categories) {
+function animalFormulaChip(name, animalByName) {
+  const row = animalByName.get(name);
+  const wrapper = el(row?.pageUrl ? 'a' : 'span', 'animal-formula-chip');
+  if (row?.pageUrl) {
+    wrapper.href = row.pageUrl;
+    wrapper.target = '_blank';
+    wrapper.rel = 'noreferrer';
+  }
+  if (row?.imageUrl) {
+    const image = el('img', 'animal-mini-thumb');
+    image.src = row.imageUrl;
+    image.alt = name;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    wrapper.appendChild(image);
+  }
+  wrapper.appendChild(el('span', null, name));
+  return wrapper;
+}
+
+function animalFormulaCell(name, animalByName) {
+  const td = el('td');
+  if (name && name !== 'None') td.appendChild(animalFormulaChip(name, animalByName));
+  return td;
+}
+
+function materialDetail(name, categories, animalByName) {
   const detail = el('div', 'material-detail');
-  detail.appendChild(el('span', 'material-name', name || '未知材料'));
+  const nameWrap = el('div', 'material-name-wrap');
+  nameWrap.appendChild(name ? animalFormulaChip(name, animalByName) : el('span', 'material-name', '未知材料'));
+  detail.appendChild(nameWrap);
   const chips = el('div', 'material-categories');
   splitValues(categories || '未知').forEach(category => chips.appendChild(categoryChip(category)));
   detail.appendChild(chips);
@@ -196,7 +247,8 @@ function renderAnimals(summary, rows) {
   fillSelect('animalTier', [...new Set(rows.map(row => String(row.tier)))].sort((a, b) => Number(a) - Number(b)), value => `Tier ${value}`);
   fillSelect('animalCategory', [...new Set(rows.flatMap(row => splitValues(row.categories)))].sort());
   fillSelect('animalAcquisition', [...new Set(rows.map(row => row.acquisition))].sort());
-  renderSecretRecommendations(rows);
+  const animalByName = new Map(rows.map(row => [row.animal, row]));
+  renderSecretRecommendations(rows, animalByName);
 
   const tbody = document.getElementById('animalRows');
   tbody.textContent = '';
@@ -206,34 +258,34 @@ function renderAnimals(summary, rows) {
     tr.dataset.categories = row.categories;
     tr.dataset.acquisition = row.acquisition;
     if (row.secretRecommendationRank) tr.classList.add('secret-recommended-row');
-    tr.append(el('td', null, row.no), el('td', null, row.animal), el('td', null, `Tier ${row.tier}`));
+    tr.append(el('td', null, row.no), animalIdentityCell(row), el('td', null, `Tier ${row.tier}`));
     tr.append(categoryCell(row.categories), el('td', null, row.season || row.acquisition));
-    tr.append(formulaCell(row.formula1), categoryCell(row.formula1Categories));
-    tr.append(formulaCell(row.formula2), categoryCell(row.formula2Categories));
+    tr.append(animalFormulaCell(row.formula1, animalByName), categoryCell(row.formula1Categories));
+    tr.append(animalFormulaCell(row.formula2, animalByName), categoryCell(row.formula2Categories));
     tr.append(secretAdviceCell(row), el('td', null, row.acquisition));
     tbody.appendChild(tr);
   });
 }
 
-function renderSecretRecommendations(rows) {
+function renderSecretRecommendations(rows, animalByName) {
   const tbody = document.getElementById('secretRecommendationRows');
   tbody.textContent = '';
   rows.filter(row => row.secretRecommendationRank)
     .sort((a, b) => Number(a.secretRecommendationRank) - Number(b.secretRecommendationRank))
     .forEach(row => {
       const tr = el('tr');
-      tr.append(el('td', null, row.secretRecommendationRank), el('td', null, row.animal), el('td', null, `Tier ${row.tier}`));
+      tr.append(el('td', null, row.secretRecommendationRank), animalIdentityCell(row), el('td', null, `Tier ${row.tier}`));
       tr.append(categoryCell(row.categories));
 
       const formula = el('td', 'formula-summary');
-      formula.appendChild(el('span', 'formula-part', row.formula1));
+      formula.appendChild(animalFormulaChip(row.formula1, animalByName));
       formula.appendChild(document.createTextNode(' + '));
-      formula.appendChild(el('span', 'formula-part', row.formula2));
+      formula.appendChild(animalFormulaChip(row.formula2, animalByName));
       tr.appendChild(formula);
 
       const materialCell = el('td', 'material-detail-cell');
-      materialCell.appendChild(materialDetail(row.formula1, row.formula1Categories));
-      materialCell.appendChild(materialDetail(row.formula2, row.formula2Categories));
+      materialCell.appendChild(materialDetail(row.formula1, row.formula1Categories, animalByName));
+      materialCell.appendChild(materialDetail(row.formula2, row.formula2Categories, animalByName));
       tr.appendChild(materialCell);
 
       tr.append(el('td', null, `基础材料 ${row.baseMaterialCost} · 材料复用 ${row.materialUseScore}`));
