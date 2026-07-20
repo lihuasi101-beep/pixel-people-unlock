@@ -427,14 +427,14 @@ $payload = [pscustomobject]@{
   summary = $summary
   rows = $outputRows
 }
-Write-Utf8NoBom (Join-Path $distDataDir 'professions.json') (($payload | ConvertTo-Json -Depth 8))
+Write-Utf8NoBom (Join-Path $distDataDir 'professions.json') (($payload | ConvertTo-Json -Depth 8 -Compress))
 $outputRows | Export-Csv -NoTypeInformation -Encoding UTF8 -Path (Join-Path $distDataDir 'profession_status.csv')
 
 $animalPayload = [pscustomobject]@{
   summary = $animalSummary
   rows = $animalRows
 }
-Write-Utf8NoBom (Join-Path $distDataDir 'animals.json') (($animalPayload | ConvertTo-Json -Depth 8))
+Write-Utf8NoBom (Join-Path $distDataDir 'animals.json') (($animalPayload | ConvertTo-Json -Depth 8 -Compress))
 if ($animalRows.Count -gt 0) {
   $animalRows | Export-Csv -NoTypeInformation -Encoding UTF8 -Path (Join-Path $distDataDir 'animal_status.csv')
 }

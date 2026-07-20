@@ -129,11 +129,12 @@ function fillSelect(id, values, labelFor = value => value) {
   });
 }
 
-function setupTabs() {
+function setupTabs(onTabChange) {
   document.querySelectorAll('.tab-button').forEach(button => {
     button.addEventListener('click', () => {
       document.querySelectorAll('.tab-button').forEach(item => item.classList.toggle('active', item === button));
       document.querySelectorAll('.tab-view').forEach(view => view.classList.toggle('active', view.id === `${button.dataset.tab}View`));
+      if (onTabChange) onTabChange(button.dataset.tab);
     });
   });
 }
@@ -316,20 +317,43 @@ function applyAnimalFilters() {
 }
 
 async function getJson(path) {
-  const response = await fetch(path, { cache: 'no-store' });
+  const response = await fetch(path);
   if (!response.ok) throw new Error(`${path} ${response.status}`);
   return response.json();
 }
 
+let animalLoadPromise = null;
+
+function loadAnimals() {
+  if (!animalLoadPromise) {
+    document.getElementById('animal-total').textContent = '...';
+    animalLoadPromise = getJson('./data/animals.json')
+      .then(animalPayload => {
+        renderAnimals(animalPayload.summary, animalPayload.rows);
+        applyAnimalFilters();
+        return animalPayload;
+      })
+      .catch(error => {
+        document.getElementById('animal-total').textContent = '!';
+        document.getElementById('animalRows').textContent = '';
+        const tr = el('tr');
+        const td = el('td', null, `加载失败：${error.message}`);
+        td.colSpan = 11;
+        tr.appendChild(td);
+        document.getElementById('animalRows').appendChild(tr);
+        animalLoadPromise = null;
+        return null;
+      });
+  }
+  return animalLoadPromise;
+}
+
 async function main() {
-  setupTabs();
-  const [professionPayload, animalPayload] = await Promise.all([
-    getJson('./data/professions.json'),
-    getJson('./data/animals.json')
-  ]);
+  setupTabs(tab => {
+    if (tab === 'animals') loadAnimals();
+  });
+  const professionPayload = await getJson('./data/professions.json');
   const { summary, rows } = professionPayload;
-  const animalSummary = animalPayload.summary;
-  const animalRows = animalPayload.rows;
 
   document.getElementById('meta').textContent = `生成时间：${summary.generatedAt} · 数据源：data/professions.csv + data/state.json + data/animals.csv`;
   document.getElementById('genes').textContent = `当前可用特殊基因：${summary.availableGenes.join(', ') || '无'}`;
@@ -343,7 +367,6 @@ async function main() {
   fillSelect('category', [...new Set(rows.map(row => row.category))].sort());
   renderTopNew(rows);
   renderProfessionRows(rows);
-  renderAnimals(animalSummary, animalRows);
 
   document.getElementById('q').addEventListener('input', applyProfessionFilters);
   document.getElementById('status').addEventListener('change', applyProfessionFilters);
