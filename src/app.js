@@ -33,6 +33,15 @@ function splitValues(value) {
   return String(value || '').split(',').map(v => v.trim()).filter(Boolean);
 }
 
+function normalizeSearchText(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[‘’]/g, "'")
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
 function categoryChip(text) {
   const chip = el('span', 'category-chip', text);
   const tone = text === '特殊基因' ? ['#fff7ed', '#7c2d12', '#fdba74', '#ea580c'] : toneFor(text || 'unknown');
@@ -136,6 +145,161 @@ function setupTabs(onTabChange) {
       document.querySelectorAll('.tab-view').forEach(view => view.classList.toggle('active', view.id === `${button.dataset.tab}View`));
       if (onTabChange) onTabChange(button.dataset.tab);
     });
+  });
+}
+
+function buildingSearchRank(entry, query) {
+  const normalized = normalizeSearchText(query);
+  if (!normalized) return Number.POSITIVE_INFINITY;
+  const compact = normalized.replace(/\s+/g, '');
+  if (entry.normalized === normalized || entry.compact === compact) return 0;
+  if (entry.normalized.startsWith(normalized)) return 1;
+  if (entry.normalized.split(' ').some(part => part.startsWith(normalized))) return 2;
+  if (entry.normalized.includes(normalized)) return 3;
+  if (compact && entry.compact.includes(compact)) return 4;
+  return Number.POSITIVE_INFINITY;
+}
+
+function createBuildingIndex(rows) {
+  const workersByBuilding = new Map();
+  rows.forEach(row => {
+    splitValues(row.workplaces).forEach(building => {
+      if (!workersByBuilding.has(building)) workersByBuilding.set(building, []);
+      workersByBuilding.get(building).push(row);
+    });
+  });
+
+  return [...workersByBuilding.entries()]
+    .map(([name, workers]) => {
+      const normalized = normalizeSearchText(name);
+      return {
+        name,
+        normalized,
+        compact: normalized.replace(/\s+/g, ''),
+        workers: workers.sort((a, b) => Number(a.no) - Number(b.no))
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, 'en'));
+}
+
+function findBuildings(entries, query) {
+  return entries
+    .map(entry => ({ entry, rank: buildingSearchRank(entry, query) }))
+    .filter(match => Number.isFinite(match.rank))
+    .sort((a, b) => a.rank - b.rank || a.entry.name.localeCompare(b.entry.name, 'en'));
+}
+
+function renderBuildingResult(entry) {
+  const result = document.getElementById('buildingResult');
+  const suggestions = document.getElementById('buildingSuggestions');
+  const feedback = document.getElementById('buildingLookupFeedback');
+  const tbody = document.getElementById('buildingWorkerRows');
+  const statusOrder = { '已解锁': 0, '推荐解锁': 1, '可解锁-未纳入当前目标': 2, '暂不可解锁': 3 };
+  const workers = [...entry.workers].sort((a, b) =>
+    (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9) || Number(a.no) - Number(b.no)
+  );
+  const unlocked = workers.filter(worker => worker.status === '已解锁').length;
+
+  document.getElementById('buildingResultName').textContent = entry.name;
+  document.getElementById('buildingResultSummary').textContent =
+    `${workers.length} 种工人 · 已解锁 ${unlocked} · 未解锁 ${workers.length - unlocked}`;
+  tbody.textContent = '';
+  workers.forEach(worker => {
+    const tr = el('tr');
+    const status = el('td', 'status-cell');
+    status.appendChild(el('span', `badge ${stateClass[worker.status] || 'state-other'}`, worker.status));
+    tr.append(el('td', null, worker.no), el('td', 'building-worker-name', worker.profession));
+    tr.append(categoryCell(worker.category), status);
+    tbody.appendChild(tr);
+  });
+
+  feedback.textContent = '';
+  suggestions.textContent = '';
+  suggestions.hidden = true;
+  result.hidden = false;
+}
+
+function renderBuildingSuggestions(matches, query) {
+  const result = document.getElementById('buildingResult');
+  const suggestions = document.getElementById('buildingSuggestions');
+  const feedback = document.getElementById('buildingLookupFeedback');
+  result.hidden = true;
+  suggestions.textContent = '';
+
+  if (!matches.length) {
+    suggestions.hidden = true;
+    feedback.textContent = `未找到“${query.trim()}”对应的建筑`;
+    return;
+  }
+
+  const visibleMatches = matches.slice(0, 16);
+  feedback.textContent = matches.length > visibleMatches.length
+    ? `找到 ${matches.length} 个匹配建筑，显示前 ${visibleMatches.length} 个`
+    : `找到 ${matches.length} 个匹配建筑，请选择一个`;
+  visibleMatches.forEach(({ entry }) => {
+    const button = el('button', 'building-suggestion');
+    button.type = 'button';
+    button.dataset.building = entry.name;
+    button.append(el('span', 'building-suggestion-name', entry.name));
+    button.append(el('span', 'building-suggestion-count', `${entry.workers.length} 种工人`));
+    suggestions.appendChild(button);
+  });
+  suggestions.hidden = false;
+}
+
+function setupBuildingLookup(rows) {
+  const entries = createBuildingIndex(rows);
+  const byName = new Map(entries.map(entry => [entry.name, entry]));
+  const input = document.getElementById('buildingQuery');
+  const datalist = document.getElementById('buildingOptions');
+  const suggestions = document.getElementById('buildingSuggestions');
+  const result = document.getElementById('buildingResult');
+  const feedback = document.getElementById('buildingLookupFeedback');
+
+  document.getElementById('buildingCount').textContent = `${entries.length} 个建筑`;
+  entries.forEach(entry => {
+    const option = el('option');
+    option.value = entry.name;
+    datalist.appendChild(option);
+  });
+
+  const update = () => {
+    const query = input.value.trim();
+    if (!query) {
+      feedback.textContent = '';
+      suggestions.textContent = '';
+      suggestions.hidden = true;
+      result.hidden = true;
+      return;
+    }
+
+    const matches = findBuildings(entries, query);
+    const exact = matches.find(match => match.rank === 0);
+    if (exact) {
+      renderBuildingResult(exact.entry);
+    } else if (matches.length === 1) {
+      renderBuildingResult(matches[0].entry);
+    } else {
+      renderBuildingSuggestions(matches, query);
+    }
+  };
+
+  input.addEventListener('input', update);
+  input.addEventListener('change', update);
+  input.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      update();
+    }
+  });
+  suggestions.addEventListener('click', event => {
+    const button = event.target.closest('button[data-building]');
+    if (!button) return;
+    const entry = byName.get(button.dataset.building);
+    if (!entry) return;
+    input.value = entry.name;
+    renderBuildingResult(entry);
+    input.focus();
   });
 }
 
@@ -365,6 +529,7 @@ async function main() {
 
   fillSelect('status', [...new Set(rows.map(row => row.status))].sort());
   fillSelect('category', [...new Set(rows.map(row => row.category))].sort());
+  setupBuildingLookup(rows);
   renderTopNew(rows);
   renderProfessionRows(rows);
 

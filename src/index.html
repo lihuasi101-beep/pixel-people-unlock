@@ -27,6 +27,40 @@
         <div class="stat"><b id="stat-blocked">-</b><span>仍缺前置</span></div>
       </div>
 
+      <section class="building-lookup">
+        <h2>建筑工人查询</h2>
+        <div class="building-search-row">
+          <label class="sr-only" for="buildingQuery">建筑名称</label>
+          <input
+            id="buildingQuery"
+            type="search"
+            list="buildingOptions"
+            placeholder="搜索建筑名称"
+            autocomplete="off"
+            spellcheck="false"
+            aria-controls="buildingSuggestions buildingResult"
+          />
+          <datalist id="buildingOptions"></datalist>
+          <span id="buildingCount" class="building-count"></span>
+        </div>
+        <div id="buildingLookupFeedback" class="building-lookup-feedback" role="status" aria-live="polite"></div>
+        <div id="buildingSuggestions" class="building-suggestions" aria-label="匹配的建筑" hidden></div>
+        <div id="buildingResult" class="building-result" hidden>
+          <div class="building-result-head">
+            <h3 id="buildingResultName"></h3>
+            <span id="buildingResultSummary" class="building-result-summary"></span>
+          </div>
+          <div class="table-wrap building-result-table">
+            <table id="buildingWorkerTable">
+              <thead>
+                <tr><th>#</th><th>职业</th><th>分类</th><th>当前状态</th></tr>
+              </thead>
+              <tbody id="buildingWorkerRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <section>
         <h2>优先新增建筑</h2>
         <div class="table-wrap small-table">
