@@ -50,7 +50,10 @@
     "Juggler",
     "Forester",
     "Auctioneer",
-    "Regent"
+    "Regent",
+    "Apprentice",
+    "Housekeeper",
+    "Swashbuckler"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -63,7 +66,6 @@
   ],
   "explicitPending": [
     "Matador",
-    "Apprentice",
     "System Admin",
     "Wedding Singer",
     "Jeweller",
