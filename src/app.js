@@ -66,9 +66,26 @@ function categoryCell(categories) {
   return td;
 }
 
+function professionSearchButton(name, className) {
+  const button = el('button', className, name);
+  button.type = 'button';
+  button.dataset.professionSearch = name;
+  button.title = `搜索职业：${name}`;
+  button.setAttribute('aria-label', `按 ${name} 搜索职业`);
+  return button;
+}
+
+function professionNameCell(name) {
+  const td = el('td', 'profession-name-cell');
+  if (name && name !== 'None') td.appendChild(professionSearchButton(name, 'profession-name-link'));
+  return td;
+}
+
 function formulaCell(name) {
   const td = el('td');
-  if (name && name !== 'None') td.appendChild(el('span', 'formula-chip', name));
+  if (name && name !== 'None') {
+    td.appendChild(professionSearchButton(name, 'formula-chip profession-search-chip'));
+  }
   return td;
 }
 
@@ -363,7 +380,7 @@ function renderProfessionRows(rows) {
     tr.dataset.profession = row.profession;
     tr.dataset.status = row.status;
     tr.dataset.category = row.category;
-    tr.append(el('td', null, row.no), el('td', null, row.profession), categoryCell(row.category));
+    tr.append(el('td', null, row.no), professionNameCell(row.profession), categoryCell(row.category));
     tr.append(formulaCell(row.formula1), categoryCell(row.formula1Category));
     tr.append(formulaCell(row.formula2), categoryCell(row.formula2Category));
     tr.append(el('td', null, row.workplaces));
@@ -377,6 +394,23 @@ function renderProfessionRows(rows) {
     missing.appendChild(chipList(row.missingPrerequisites, 'missing-chip'));
     tr.append(status, el('td', null, row.currentCraftable), currentNew, el('td', null, row.recommendedStep || ''), stepNew, missing);
     tbody.appendChild(tr);
+  });
+}
+
+function applyProfessionSearch(value) {
+  const input = document.getElementById('q');
+  input.value = value;
+  applyProfessionFilters();
+  input.focus();
+  input.select();
+}
+
+function setupProfessionSearchLinks() {
+  const tbody = document.getElementById('professionRows');
+  tbody.addEventListener('click', event => {
+    const trigger = event.target.closest('[data-profession-search]');
+    if (!trigger || !tbody.contains(trigger)) return;
+    applyProfessionSearch(trigger.dataset.professionSearch);
   });
 }
 
@@ -560,6 +594,7 @@ async function main() {
   renderTopNew(rows);
   renderFutureBuildingPlans(professionPayload.futureBuildingPlans || []);
   renderProfessionRows(rows);
+  setupProfessionSearchLinks();
 
   document.getElementById('q').addEventListener('input', applyProfessionFilters);
   document.getElementById('status').addEventListener('change', applyProfessionFilters);
