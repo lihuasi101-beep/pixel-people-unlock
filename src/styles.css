@@ -84,6 +84,12 @@ input, select {
 input { min-width:280px; flex:1; }
 section { margin-top:18px; }
 h2 { font-size:17px; margin:0 0 10px; padding-left:10px; border-left:4px solid #0f766e; }
+.heading-count {
+  color:var(--muted);
+  font-size:12px;
+  font-weight:400;
+  margin-left:8px;
+}
 .building-search-row {
   display:grid;
   grid-template-columns:minmax(280px,560px) auto;
@@ -368,6 +374,10 @@ tr:hover td { background:#fbfcfe; }
 .small-table table { min-width:1050px; }
 .small-table td:nth-child(4) { min-width:320px; }
 .small-table td:nth-child(5) { background:var(--new); font-weight:700; color:#0f766e; }
+#futureBuildingTable { min-width:1200px; }
+#futureBuildingTable td:nth-child(1) { background:#f0fdfa; font-weight:700; }
+#futureBuildingTable td:nth-child(4) { white-space:nowrap; }
+#futureBuildingTable td:nth-child(6) { background:var(--missing); }
 .hidden { display:none; }
 @media (max-width:900px) {
   main, header { padding-left:14px; padding-right:14px; }

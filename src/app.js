@@ -327,6 +327,33 @@ function renderTopNew(rows) {
     });
 }
 
+function renderFutureBuildingPlans(plans) {
+  const tbody = document.getElementById('futureBuildingRows');
+  const count = document.getElementById('futureBuildingCount');
+  const sortedPlans = [...plans].sort((a, b) => Number(a.no) - Number(b.no) || a.building.localeCompare(b.building, 'en'));
+  count.textContent = `${sortedPlans.length} 个未覆盖建筑`;
+  tbody.textContent = '';
+  sortedPlans.forEach(plan => {
+    const tr = el('tr');
+    const building = el('td');
+    building.appendChild(el('span', 'building-chip', plan.building));
+    const status = el('td', 'status-cell');
+    status.appendChild(el('span', `badge ${stateClass[plan.status] || 'state-other'}`, plan.status));
+    const missing = el('td');
+    missing.appendChild(chipList(plan.missingPrerequisites, 'missing-chip'));
+    tr.append(
+      building,
+      el('td', 'building-worker-name', plan.profession),
+      categoryCell(plan.category),
+      status,
+      el('td', null, plan.currentCraftable),
+      missing,
+      el('td', null, plan.workplaces)
+    );
+    tbody.appendChild(tr);
+  });
+}
+
 function renderProfessionRows(rows) {
   const tbody = document.getElementById('professionRows');
   tbody.textContent = '';
@@ -531,6 +558,7 @@ async function main() {
   fillSelect('category', [...new Set(rows.map(row => row.category))].sort());
   setupBuildingLookup(rows);
   renderTopNew(rows);
+  renderFutureBuildingPlans(professionPayload.futureBuildingPlans || []);
   renderProfessionRows(rows);
 
   document.getElementById('q').addEventListener('input', applyProfessionFilters);

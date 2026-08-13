@@ -141,6 +141,14 @@ foreach ($name in $unlocked) {
   foreach ($building in Split-List $byName[$name].workplaces) { [void]$baseBuildings.Add($building) }
 }
 
+$buildingRowsByName = @{}
+foreach ($row in $rows) {
+  foreach ($building in Split-List $row.workplaces) {
+    if (-not $buildingRowsByName.ContainsKey($building)) { $buildingRowsByName[$building] = @() }
+    $buildingRowsByName[$building] += $row
+  }
+}
+
 $rootTargets = [System.Collections.Generic.HashSet[string]]::new()
 foreach ($name in $state.explicitPending) {
   $resolved = Resolve-ConfiguredName ([string]$name) $state.aliases
@@ -293,6 +301,37 @@ foreach ($row in $rows) {
   }
 }
 
+$outputByProfession = @{}
+foreach ($row in $outputRows) { $outputByProfession[$row.profession] = $row }
+
+$strictPlannedBuildings = [System.Collections.Generic.HashSet[string]]::new()
+foreach ($row in $outputRows) {
+  if ($row.status -eq '推荐解锁') {
+    foreach ($building in Split-List $row.stepNewBuildings) { [void]$strictPlannedBuildings.Add($building) }
+  }
+}
+
+$futureBuildingPlans = @()
+foreach ($building in ($buildingRowsByName.Keys | Sort-Object)) {
+  if ($baseBuildings.Contains($building) -or $strictPlannedBuildings.Contains($building)) { continue }
+  $entry = $buildingRowsByName[$building] | Sort-Object no | Select-Object -First 1
+  $entryStatus = $outputByProfession[$entry.profession]
+  $futureBuildingPlans += [pscustomobject]@{
+    building = $building
+    no = $entry.no
+    profession = $entry.profession
+    category = $entry.category
+    formula1 = $entry.formula1
+    formula1Category = $entry.formula1Category
+    formula2 = $entry.formula2
+    formula2Category = $entry.formula2Category
+    workplaces = $entry.workplaces
+    status = $entryStatus.status
+    currentCraftable = $entryStatus.currentCraftable
+    missingPrerequisites = $entryStatus.missingPrerequisites
+  }
+}
+
 $animalRows = @()
 if (Test-Path -LiteralPath $animalsCsv) {
   foreach ($row in (Import-Csv -LiteralPath $animalsCsv)) {
@@ -384,6 +423,7 @@ $summary = [pscustomobject]@{
   total = $outputRows.Count
   unlocked = ($outputRows | Where-Object { $_.status -eq '已解锁' }).Count
   buildings = $baseBuildings.Count
+  futureBuildings = $futureBuildingPlans.Count
   planned = ($outputRows | Where-Object { $_.status -eq '推荐解锁' }).Count
   blocked = ($outputRows | Where-Object { $_.status -eq '暂不可解锁' }).Count
   availableGenes = @($availableGenes | Sort-Object)
@@ -426,6 +466,7 @@ Copy-Item -LiteralPath $statePath -Destination (Join-Path $distDataDir 'state.js
 $payload = [pscustomobject]@{
   summary = $summary
   rows = $outputRows
+  futureBuildingPlans = $futureBuildingPlans
 }
 Write-Utf8NoBom (Join-Path $distDataDir 'professions.json') (($payload | ConvertTo-Json -Depth 8 -Compress))
 $outputRows | Export-Csv -NoTypeInformation -Encoding UTF8 -Path (Join-Path $distDataDir 'profession_status.csv')
