@@ -84,6 +84,7 @@
     "Dating Advisor"
   ],
   "priorityTargets": [
+    "Bell Ringer",
     "Bandit",
     "Ghost"
   ],
@@ -95,6 +96,7 @@
     "unlockThrough is a convenience baseline only; explicitUnlocked is the player's confirmed state.",
     "Build adds ordinary-profession prerequisites for unlocked professions.",
     "A newly confirmed profession does not confirm any downstream profession that uses it as a prerequisite; downstream professions remain unconfirmed until explicitly reported.",
+    "Bell Ringer and every direct or transitive downstream profession remain unconfirmed until the user explicitly reports each unlock.",
     "explicitUnlockedGenes stores confirmed special genes that are available even before a confirmed unlocked profession implies them."
   ]
 }
