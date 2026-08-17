@@ -304,6 +304,38 @@ foreach ($row in $rows) {
 $outputByProfession = @{}
 foreach ($row in $outputRows) { $outputByProfession[$row.profession] = $row }
 
+$priorityTargetRows = @()
+$priorityTargetBuildings = [System.Collections.Generic.HashSet[string]]::new()
+$seenPriorityTargets = [System.Collections.Generic.HashSet[string]]::new()
+if ($state.PSObject.Properties.Name -contains 'priorityTargets') {
+  $priorityOrder = 0
+  foreach ($name in $state.priorityTargets) {
+    $resolved = Resolve-ConfiguredName ([string]$name) $state.aliases
+    if (-not $byName.ContainsKey($resolved)) {
+      Write-Warning "priorityTargets '$name' was not found and was ignored."
+      continue
+    }
+    if ($unlocked.Contains($resolved) -or -not $seenPriorityTargets.Add($resolved)) { continue }
+    $priorityOrder++
+    $row = $outputByProfession[$resolved]
+    foreach ($building in Split-List $row.currentNewBuildings) { [void]$priorityTargetBuildings.Add($building) }
+    $priorityTargetRows += [pscustomobject]@{
+      priorityOrder = $priorityOrder
+      profession = $row.profession
+      category = $row.category
+      formula1 = $row.formula1
+      formula1Category = $row.formula1Category
+      formula2 = $row.formula2
+      formula2Category = $row.formula2Category
+      workplaces = $row.workplaces
+      status = $row.status
+      currentCraftable = $row.currentCraftable
+      currentNewBuildings = $row.currentNewBuildings
+      missingPrerequisites = $row.missingPrerequisites
+    }
+  }
+}
+
 $strictPlannedBuildings = [System.Collections.Generic.HashSet[string]]::new()
 foreach ($row in $outputRows) {
   if ($row.status -eq '推荐解锁') {
@@ -313,7 +345,9 @@ foreach ($row in $outputRows) {
 
 $futureBuildingPlans = @()
 foreach ($building in ($buildingRowsByName.Keys | Sort-Object)) {
-  if ($baseBuildings.Contains($building) -or $strictPlannedBuildings.Contains($building)) { continue }
+  $coveredByVisiblePriority = $priorityTargetBuildings.Contains($building) -or
+    ($priorityTargetRows.Count -eq 0 -and $strictPlannedBuildings.Contains($building))
+  if ($baseBuildings.Contains($building) -or $coveredByVisiblePriority) { continue }
   $entry = $buildingRowsByName[$building] | Sort-Object no | Select-Object -First 1
   $entryStatus = $outputByProfession[$entry.profession]
   $futureBuildingPlans += [pscustomobject]@{
@@ -466,6 +500,7 @@ Copy-Item -LiteralPath $statePath -Destination (Join-Path $distDataDir 'state.js
 $payload = [pscustomobject]@{
   summary = $summary
   rows = $outputRows
+  priorityTargets = $priorityTargetRows
   futureBuildingPlans = $futureBuildingPlans
 }
 Write-Utf8NoBom (Join-Path $distDataDir 'professions.json') (($payload | ConvertTo-Json -Depth 8 -Compress))

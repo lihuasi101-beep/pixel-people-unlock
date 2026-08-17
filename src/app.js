@@ -320,15 +320,24 @@ function setupBuildingLookup(rows) {
   });
 }
 
-function renderTopNew(rows) {
+function renderTopNew(rows, priorityTargets = []) {
   const tbody = document.getElementById('topNewRows');
   tbody.textContent = '';
-  rows.filter(r => r.status === '推荐解锁' && r.stepNewBuildings)
-    .sort((a, b) => Number(a.recommendedStep) - Number(b.recommendedStep))
-    .slice(0, 30)
+  const manualTargets = priorityTargets.length > 0;
+  const displayRows = manualTargets
+    ? [...priorityTargets].sort((a, b) => Number(a.priorityOrder) - Number(b.priorityOrder))
+    : rows.filter(r => r.status === '推荐解锁' && r.stepNewBuildings)
+      .sort((a, b) => Number(a.recommendedStep) - Number(b.recommendedStep))
+      .slice(0, 30);
+
+  displayRows
     .forEach(row => {
       const tr = el('tr');
-      tr.append(el('td', null, row.recommendedStep), el('td', null, row.profession), categoryCell(row.category));
+      tr.append(
+        el('td', null, manualTargets ? row.priorityOrder : row.recommendedStep),
+        el('td', null, row.profession),
+        categoryCell(row.category)
+      );
       const formula = el('td', 'formula-summary');
       [
         `${row.formula1}${row.formula1Category ? `（${row.formula1Category}）` : ''}`,
@@ -337,9 +346,20 @@ function renderTopNew(rows) {
         formula.appendChild(el('span', 'formula-part', part));
         if (index === 0) formula.appendChild(document.createTextNode(' + '));
       });
+      const status = el('td', 'status-cell');
+      status.appendChild(el('span', `badge ${stateClass[row.status] || 'state-other'}`, row.status));
       const newTd = el('td');
-      newTd.appendChild(chipList(row.stepNewBuildings, 'building-chip'));
-      tr.append(formula, newTd, el('td', null, row.workplaces));
+      newTd.appendChild(chipList(manualTargets ? row.currentNewBuildings : row.stepNewBuildings, 'building-chip'));
+      const missing = el('td');
+      missing.appendChild(chipList(row.missingPrerequisites, 'missing-chip'));
+      tr.append(
+        formula,
+        status,
+        el('td', null, row.currentCraftable),
+        newTd,
+        missing,
+        el('td', null, row.workplaces)
+      );
       tbody.appendChild(tr);
     });
 }
@@ -591,7 +611,7 @@ async function main() {
   fillSelect('status', [...new Set(rows.map(row => row.status))].sort());
   fillSelect('category', [...new Set(rows.map(row => row.category))].sort());
   setupBuildingLookup(rows);
-  renderTopNew(rows);
+  renderTopNew(rows, professionPayload.priorityTargets || []);
   renderFutureBuildingPlans(professionPayload.futureBuildingPlans || []);
   renderProfessionRows(rows);
   setupProfessionSearchLinks();

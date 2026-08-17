@@ -62,7 +62,9 @@
     "Ice Lord",
     "Snow Elemental",
     "Blacksmith",
-    "Engine Driver"
+    "Engine Driver",
+    "Conductor",
+    "Tour Guide"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -80,6 +82,10 @@
     "Jeweller",
     "Chocolatier",
     "Dating Advisor"
+  ],
+  "priorityTargets": [
+    "Basketballer",
+    "Figure Skater"
   ],
   "targetFrom": "Federal Agent",
   "aliases": {
