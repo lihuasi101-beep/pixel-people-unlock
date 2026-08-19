@@ -67,7 +67,9 @@
     "Tour Guide",
     "Bell Ringer",
     "Henchman",
-    "Thief"
+    "Thief",
+    "Assassin",
+    "Bandit"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -87,7 +89,6 @@
     "Dating Advisor"
   ],
   "priorityTargets": [
-    "Bandit",
     "Ghost"
   ],
   "targetFrom": "Federal Agent",
