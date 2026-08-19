@@ -69,7 +69,11 @@
     "Henchman",
     "Thief",
     "Assassin",
-    "Bandit"
+    "Bandit",
+    "Cardiologist",
+    "Vampire",
+    "Mummy",
+    "Ghost"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -88,9 +92,7 @@
     "Chocolatier",
     "Dating Advisor"
   ],
-  "priorityTargets": [
-    "Ghost"
-  ],
+  "priorityTargets": [],
   "targetFrom": "Federal Agent",
   "aliases": {
     "Supervilain": "Supervillain"
