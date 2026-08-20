@@ -92,7 +92,12 @@
     "Chocolatier",
     "Dating Advisor"
   ],
-  "priorityTargets": [],
+  "priorityTargets": [
+    "Songwriter",
+    "Punk Rocker",
+    "Rockstar",
+    "Wonderlander"
+  ],
   "targetFrom": "Federal Agent",
   "aliases": {
     "Supervilain": "Supervillain"
