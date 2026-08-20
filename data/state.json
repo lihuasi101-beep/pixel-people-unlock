@@ -77,7 +77,8 @@
     "Songwriter",
     "Guitarist",
     "Punk Rocker",
-    "Vocalist"
+    "Vocalist",
+    "Rockstar"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -97,7 +98,6 @@
     "Dating Advisor"
   ],
   "priorityTargets": [
-    "Rockstar",
     "Wonderlander"
   ],
   "targetFrom": "Federal Agent",
