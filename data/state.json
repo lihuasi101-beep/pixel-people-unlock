@@ -73,7 +73,11 @@
     "Cardiologist",
     "Vampire",
     "Mummy",
-    "Ghost"
+    "Ghost",
+    "Songwriter",
+    "Guitarist",
+    "Punk Rocker",
+    "Vocalist"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -93,8 +97,6 @@
     "Dating Advisor"
   ],
   "priorityTargets": [
-    "Songwriter",
-    "Punk Rocker",
     "Rockstar",
     "Wonderlander"
   ],
