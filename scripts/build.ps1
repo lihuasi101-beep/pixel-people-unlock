@@ -37,6 +37,17 @@ function Get-Descendants([string]$Name, $Children) {
   return $result
 }
 
+function Add-PriorityTargetChain([string]$Name, $ByName, $Unlocked, $Seen, $Ordered) {
+  if (-not $ByName.ContainsKey($Name) -or $Unlocked.Contains($Name) -or -not $Seen.Add($Name)) { return }
+  $row = $ByName[$Name]
+  foreach ($dep in @($row.formula1, $row.formula2)) {
+    if (Is-NormalProfession $dep $ByName -and -not $Unlocked.Contains($dep)) {
+      Add-PriorityTargetChain $dep $ByName $Unlocked $Seen $Ordered
+    }
+  }
+  [void]$Ordered.Add($Name)
+}
+
 function Resolve-ConfiguredName([string]$Name, $Aliases) {
   if ($Aliases -and $Aliases.PSObject.Properties.Name -contains $Name) {
     return [string]$Aliases.$Name
@@ -307,15 +318,18 @@ foreach ($row in $outputRows) { $outputByProfession[$row.profession] = $row }
 $priorityTargetRows = @()
 $priorityTargetBuildings = [System.Collections.Generic.HashSet[string]]::new()
 $seenPriorityTargets = [System.Collections.Generic.HashSet[string]]::new()
+$priorityTargetNames = [System.Collections.Generic.List[string]]::new()
 if ($state.PSObject.Properties.Name -contains 'priorityTargets') {
-  $priorityOrder = 0
   foreach ($name in $state.priorityTargets) {
     $resolved = Resolve-ConfiguredName ([string]$name) $state.aliases
     if (-not $byName.ContainsKey($resolved)) {
       Write-Warning "priorityTargets '$name' was not found and was ignored."
       continue
     }
-    if ($unlocked.Contains($resolved) -or -not $seenPriorityTargets.Add($resolved)) { continue }
+    Add-PriorityTargetChain $resolved $byName $unlocked $seenPriorityTargets $priorityTargetNames
+  }
+  $priorityOrder = 0
+  foreach ($resolved in $priorityTargetNames) {
     $priorityOrder++
     $row = $outputByProfession[$resolved]
     foreach ($building in Split-List $row.currentNewBuildings) { [void]$priorityTargetBuildings.Add($building) }
