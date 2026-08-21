@@ -81,7 +81,10 @@
     "Rockstar",
     "Eagle Scout",
     "Werewolf",
-    "Big Bad Wolf"
+    "Big Bad Wolf",
+    "Hooded Rider",
+    "Adventurer",
+    "Wonderlander"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -101,9 +104,7 @@
     "Chocolatier",
     "Dating Advisor"
   ],
-  "priorityTargets": [
-    "Wonderlander"
-  ],
+  "priorityTargets": [],
   "targetFrom": "Federal Agent",
   "aliases": {
     "Supervilain": "Supervillain"
