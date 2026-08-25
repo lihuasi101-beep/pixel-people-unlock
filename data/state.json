@@ -89,7 +89,8 @@
     "Tailor",
     "Jeweller",
     "Fashion Designer",
-    "Double Bassist"
+    "Double Bassist",
+    "Chocolatier"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -105,7 +106,6 @@
     "Matador",
     "System Admin",
     "Wedding Singer",
-    "Chocolatier",
     "Dating Advisor"
   ],
   "priorityTargets": [],
