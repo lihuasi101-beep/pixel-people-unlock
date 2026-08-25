@@ -84,7 +84,10 @@
     "Big Bad Wolf",
     "Hooded Rider",
     "Adventurer",
-    "Wonderlander"
+    "Wonderlander",
+    "Bassist",
+    "Tailor",
+    "Jeweller"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -100,7 +103,6 @@
     "Matador",
     "System Admin",
     "Wedding Singer",
-    "Jeweller",
     "Chocolatier",
     "Dating Advisor"
   ],

@@ -100,6 +100,22 @@ $byName = @{}
 foreach ($row in $rows) { $byName[$row.profession] = $row }
 $byNo = $rows | Sort-Object no
 
+$configuredUnlocked = [System.Collections.Generic.HashSet[string]]::new()
+foreach ($name in $state.explicitUnlocked) {
+  [void]$configuredUnlocked.Add((Resolve-ConfiguredName ([string]$name) $state.aliases))
+}
+if ($state.PSObject.Properties.Name -contains 'explicitPending') {
+  $stateConflicts = @(
+    $state.explicitPending |
+      ForEach-Object { Resolve-ConfiguredName ([string]$_) $state.aliases } |
+      Where-Object { $configuredUnlocked.Contains($_) } |
+      Sort-Object -Unique
+  )
+  if ($stateConflicts.Count -gt 0) {
+    throw "State conflict: profession(s) appear in both explicitUnlocked and explicitPending: $($stateConflicts -join ', ')"
+  }
+}
+
 $unlocked = [System.Collections.Generic.HashSet[string]]::new()
 $unlockThrough = Resolve-ConfiguredName ([string]$state.unlockThrough) $state.aliases
 if (-not $byName.ContainsKey($unlockThrough)) {
