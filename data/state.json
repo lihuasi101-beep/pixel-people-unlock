@@ -90,7 +90,9 @@
     "Jeweller",
     "Fashion Designer",
     "Double Bassist",
-    "Chocolatier"
+    "Chocolatier",
+    "Dating Advisor",
+    "Makeup Artist"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -105,8 +107,7 @@
   "explicitPending": [
     "Matador",
     "System Admin",
-    "Wedding Singer",
-    "Dating Advisor"
+    "Wedding Singer"
   ],
   "priorityTargets": [],
   "targetFrom": "Federal Agent",
