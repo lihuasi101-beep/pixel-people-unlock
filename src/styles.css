@@ -206,7 +206,7 @@ th {
   box-shadow:inset 0 -1px 0 var(--line);
 }
 tr:hover td { background:#fbfcfe; }
-.badge, .formula-chip, .category-chip, .building-chip {
+.badge, .formula-chip, .category-chip, .building-chip, .missing-chip {
   display:inline-flex;
   align-items:center;
   max-width:100%;

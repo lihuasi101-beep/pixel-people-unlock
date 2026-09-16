@@ -77,6 +77,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 - `explicitUnlocked` 是用户明确确认的已解锁职业。
 - `explicitUnlockedGenes` 是用户明确确认的已解锁特殊基因。
 - `priorityTargets` 是用户指定的优先新增职业；优先表会依赖优先展开这些目标尚未解锁的普通职业前置，但不改变职业或特殊基因的解锁状态。
+- 未指定 `priorityTargets` 时，优先表按模拟推荐顺序保留完整前置链；没有新增建筑的必要中间职业也不会被隐藏。
 - 构建时会递归补齐已解锁职业所需的普通职业前置。
 - 特殊基因在 `explicitUnlockedGenes` 中出现，或在已解锁职业配方中出现过时，视为当前可用。
 - 推荐顺位按：当前可合成 -> 新增建筑数 -> 立即后续解锁数 -> 传递后续数 -> 工作建筑数 -> Wiki 表序。

@@ -326,7 +326,7 @@ function renderTopNew(rows, priorityTargets = []) {
   const manualTargets = priorityTargets.length > 0;
   const displayRows = manualTargets
     ? [...priorityTargets].sort((a, b) => Number(a.priorityOrder) - Number(b.priorityOrder))
-    : rows.filter(r => r.status === '推荐解锁' && r.stepNewBuildings)
+    : rows.filter(r => r.status === '推荐解锁')
       .sort((a, b) => Number(a.recommendedStep) - Number(b.recommendedStep))
       .slice(0, 30);
 
