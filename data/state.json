@@ -113,7 +113,9 @@
     "Gym Instructor",
     "Deep Sea Diver",
     "Janitor",
-    "Whisky Blender"
+    "Whisky Blender",
+    "Blues Guitarist",
+    "Samurai"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -142,4 +144,3 @@
     "explicitUnlockedGenes stores confirmed special genes that are available even before a confirmed unlocked profession implies them."
   ]
 }
-
