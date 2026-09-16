@@ -101,7 +101,12 @@
     "Film Producer",
     "Overlord",
     "Ventriloquist",
-    "Online Shopper"
+    "Online Shopper",
+    "Mogul",
+    "Influencer",
+    "Voiceover Artist",
+    "Wedding Singer",
+    "Receptionist"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -116,8 +121,7 @@
   ],
   "explicitPending": [
     "Matador",
-    "System Admin",
-    "Wedding Singer"
+    "System Admin"
   ],
   "priorityTargets": [],
   "targetFrom": "Federal Agent",
