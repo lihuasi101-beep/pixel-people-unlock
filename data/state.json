@@ -139,7 +139,9 @@
     "Secret Agent",
     "Gatekeeper",
     "Imperial Guard",
-    "Shrine Attendant"
+    "Shrine Attendant",
+    "Priest",
+    "Zen Gardener"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
