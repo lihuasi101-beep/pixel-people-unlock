@@ -223,6 +223,11 @@ tr:hover td { background:#fbfcfe; }
 .state-plan { color:#064e3b; background:#ccfbf1; border-color:#5eead4; }
 .state-blocked { color:#7f1d1d; background:#fee2e2; border-color:#fecaca; }
 .state-other { color:#713f12; background:#fef3c7; border-color:#fde68a; }
+.craftable-yes { color:#14532d; background:#dcfce7; border-color:#86efac; font-weight:700; }
+.craftable-no { color:#64748b; background:#f1f5f9; border-color:#cbd5e1; }
+.craftable-cell { white-space:nowrap; text-align:center; }
+tr.craftable-row td { background:#f0fdf4; }
+tr.craftable-row:hover td { background:#dcfce7; }
 .secret-consume { color:#064e3b; background:#ccfbf1; border-color:#5eead4; }
 .secret-hold { color:#7f1d1d; background:#fee2e2; border-color:#fecaca; }
 .secret-caution { color:#713f12; background:#fef3c7; border-color:#fde68a; }

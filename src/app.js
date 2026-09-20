@@ -66,6 +66,17 @@ function categoryCell(categories) {
   return td;
 }
 
+function craftableCell(value) {
+  const td = el('td', 'craftable-cell');
+  const yes = value === '是' || value === '已解锁';
+  td.appendChild(el('span', 'badge ' + (yes ? 'craftable-yes' : 'craftable-no'), value || '否'));
+  return td;
+}
+
+function markCraftableRow(tr, value) {
+  if (value === '是') tr.classList.add('craftable-row');
+}
+
 function professionSearchButton(name, className) {
   const button = el('button', className, name);
   button.type = 'button';
@@ -333,6 +344,7 @@ function renderTopNew(rows, priorityTargets = []) {
   displayRows
     .forEach(row => {
       const tr = el('tr');
+      markCraftableRow(tr, row.currentCraftable);
       tr.append(
         el('td', null, manualTargets ? row.priorityOrder : row.recommendedStep),
         el('td', null, row.profession),
@@ -355,7 +367,7 @@ function renderTopNew(rows, priorityTargets = []) {
       tr.append(
         formula,
         status,
-        el('td', null, row.currentCraftable),
+        craftableCell(row.currentCraftable),
         newTd,
         missing,
         el('td', null, row.workplaces)
@@ -372,6 +384,7 @@ function renderFutureBuildingPlans(plans) {
   tbody.textContent = '';
   sortedPlans.forEach(plan => {
     const tr = el('tr');
+    markCraftableRow(tr, plan.currentCraftable);
     const building = el('td');
     building.appendChild(el('span', 'building-chip', plan.building));
     const status = el('td', 'status-cell');
@@ -383,7 +396,7 @@ function renderFutureBuildingPlans(plans) {
       el('td', 'building-worker-name', plan.profession),
       categoryCell(plan.category),
       status,
-      el('td', null, plan.currentCraftable),
+      craftableCell(plan.currentCraftable),
       missing,
       el('td', null, plan.workplaces)
     );
@@ -396,6 +409,7 @@ function renderProfessionRows(rows) {
   tbody.textContent = '';
   rows.forEach(row => {
     const tr = el('tr');
+    markCraftableRow(tr, row.currentCraftable);
     tr.dataset.no = String(row.no);
     tr.dataset.profession = row.profession;
     tr.dataset.status = row.status;
@@ -412,7 +426,7 @@ function renderProfessionRows(rows) {
     stepNew.appendChild(chipList(row.stepNewBuildings, 'building-chip'));
     const missing = el('td');
     missing.appendChild(chipList(row.missingPrerequisites, 'missing-chip'));
-    tr.append(status, el('td', null, row.currentCraftable), currentNew, el('td', null, row.recommendedStep || ''), stepNew, missing);
+    tr.append(status, craftableCell(row.currentCraftable), currentNew, el('td', null, row.recommendedStep || ''), stepNew, missing);
     tbody.appendChild(tr);
   });
 }

@@ -141,7 +141,10 @@
     "Imperial Guard",
     "Shrine Attendant",
     "Priest",
-    "Zen Gardener"
+    "Zen Gardener",
+    "Crisis Manager",
+    "First Mate",
+    "Store Manager"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
