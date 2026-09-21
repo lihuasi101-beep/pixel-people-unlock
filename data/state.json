@@ -155,7 +155,10 @@
     "System Admin",
     "Kaiju Whisperer",
     "Puppet",
-    "Auteur"
+    "Auteur",
+    "A-List Actor",
+    "Propsmaster",
+    "Matador"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -168,9 +171,7 @@
     "Sage",
     "Virtuoso"
   ],
-  "explicitPending": [
-    "Matador"
-  ],
+  "explicitPending": [],
   "priorityTargets": [],
   "targetFrom": "Federal Agent",
   "aliases": {
