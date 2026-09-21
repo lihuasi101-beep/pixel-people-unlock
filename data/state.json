@@ -149,7 +149,10 @@
     "Sailor",
     "Xenobiologist",
     "Relief Coordinator",
-    "Magical Student"
+    "Magical Student",
+    "Xenolinguist",
+    "Optometrist",
+    "System Admin"
   ],
   "explicitUnlockedGenes": [
     "Romantic",
@@ -163,8 +166,7 @@
     "Virtuoso"
   ],
   "explicitPending": [
-    "Matador",
-    "System Admin"
+    "Matador"
   ],
   "priorityTargets": [],
   "targetFrom": "Federal Agent",
