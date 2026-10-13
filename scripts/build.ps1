@@ -163,9 +163,12 @@ if ($state.PSObject.Properties.Name -contains 'explicitUnlockedGenes') {
 }
 
 $baseBuildings = [System.Collections.Generic.HashSet[string]]::new()
+$introducedBuildings = [System.Collections.Generic.HashSet[string]]::new()
 foreach ($name in $unlocked) {
   if (-not $byName.ContainsKey($name)) { continue }
-  foreach ($building in Split-List $byName[$name].workplaces) { [void]$baseBuildings.Add($building) }
+  $workplaces = @(Split-List $byName[$name].workplaces)
+  foreach ($building in $workplaces) { [void]$baseBuildings.Add($building) }
+  if ($workplaces.Count -gt 0) { [void]$introducedBuildings.Add($workplaces[0]) }
 }
 
 $buildingRowsByName = @{}
@@ -284,7 +287,10 @@ $outputRows = @()
 foreach ($row in $rows) {
   $depsOk = (($unlocked.Contains($row.formula1) -or $availableGenes.Contains($row.formula1) -or $row.formula1 -eq 'None') -and
     ($unlocked.Contains($row.formula2) -or $availableGenes.Contains($row.formula2) -or $row.formula2 -eq 'None'))
-  $currentNew = @(Split-List $row.workplaces | Where-Object { -not $baseBuildings.Contains($_) })
+  $currentNew = @()
+  if (-not $unlocked.Contains($row.profession)) {
+    $currentNew = @(Split-List $row.workplaces | Where-Object { -not $introducedBuildings.Contains($_) })
+  }
   $missing = @()
   foreach ($dep in @($row.formula1, $row.formula2)) {
     if ($dep -and $dep -ne 'None' -and -not $unlocked.Contains($dep) -and -not $availableGenes.Contains($dep)) { $missing += $dep }
